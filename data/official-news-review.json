@@ -1,9 +1,10 @@
 {
-  "checked_at": "2026-10-13T03:30:07.163471+00:00",
+  "version": "5.3",
+  "checked_at": "2026-10-13T03:33:40.856632+00:00",
   "status": "ok",
   "review_required": false,
-  "articles_found": 80,
-  "new_articles": 2103,
+  "first_seen_urls": 2033,
+  "articles_inspected": 35,
   "candidate_count": 0,
   "new_species_confirmed": 0,
   "source": "https://www.pokemon.com/us/pokemon-news"

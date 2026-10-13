@@ -1,6 +1,7 @@
 {
-  "checked_at": "2026-10-13T03:30:07.163471+00:00",
+  "version": "5.3",
+  "checked_at": "2026-10-13T03:33:40.856632+00:00",
   "candidate_count": 0,
   "candidates": [],
-  "notice": "Aucun candidat n'est ajouté automatiquement au Pokédex."
+  "notice": "Aucune espèce n'est ajoutée automatiquement sans validation."
 }
