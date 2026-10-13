@@ -1,9 +1,8 @@
 {
-  "version": "5.7",
-  "checked_at": "2026-10-13T04:18:20.720985+00:00",
+  "version": "5.8",
+  "checked_at": "2026-10-13T04:23:55.860415+00:00",
   "source": "live",
   "new_species_count": 0,
   "new_species_names": [],
-  "verified_by_pokeapi": true,
-  "note": "Comparaison avec le dernier catalogue local; la première exécution initialise la référence."
+  "verified_by_pokeapi": true
 }

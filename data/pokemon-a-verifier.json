@@ -1,7 +1,7 @@
 {
-  "version": "5.7",
-  "checked_at": "2026-10-13T04:18:26.921401+00:00",
+  "version": "5.8",
+  "checked_at": "2026-10-13T04:23:56.992802+00:00",
   "candidate_count": 0,
   "candidates": [],
-  "notice": "Aucun nom d'espèce déduit des titres; confirmation par PokéAPI uniquement."
+  "notice": "Aucun nom d'espèce déduit automatiquement des titres."
 }
