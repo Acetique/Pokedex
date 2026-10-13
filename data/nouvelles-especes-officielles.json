@@ -1,10 +1,9 @@
 {
-  "version": "5.6",
-  "checked_at": "2026-10-13T04:04:17.218064+00:00",
+  "version": "5.7",
+  "checked_at": "2026-10-13T04:18:20.720985+00:00",
   "source": "live",
-  "previous_max_species_id": 1025,
-  "current_max_species_id": 1025,
   "new_species_count": 0,
   "new_species_names": [],
-  "verified_by_pokeapi": true
+  "verified_by_pokeapi": true,
+  "note": "Comparaison avec le dernier catalogue local; la première exécution initialise la référence."
 }

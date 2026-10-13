@@ -1,6 +1,6 @@
 {
-  "version": "5.6",
-  "checked_at": "2026-10-13T04:04:30.286974+00:00",
+  "version": "5.7",
+  "checked_at": "2026-10-13T04:18:26.921401+00:00",
   "announcement_count": 35,
   "announcements": [
     {
@@ -8,13 +8,60 @@
       "url": "https://www.pokemon.com/us/news/see-the-new-trailer-for-pokemon-winds-and-pokemon-waves-coming-to-nintendo-switch-2",
       "published_at": null,
       "sitemap_lastmod": "2026-10-09T18:34:24.579000+00:00",
-      "priority_score": 290,
+      "priority_score": 280,
       "announcement_category": "generation_10_news",
-      "inspection_status": "suspected_generic_content",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Legends Z A Nintendo Switch 2 Edition Mega Dimension Bundle Coming Soon",
+      "url": "https://www.pokemon.com/us/news/pokemon-legends-z-a-nintendo-switch-2-edition-mega-dimension-bundle-coming-soon",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-23T22:55:27.371000+00:00",
+      "priority_score": 175,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Earn Mega Stones In Pokemon Legends Z A Ranked Battles Season 13",
+      "url": "https://www.pokemon.com/us/news/earn-mega-stones-in-pokemon-legends-z-a-ranked-battles-season-13",
+      "published_at": null,
+      "sitemap_lastmod": "2026-06-16T18:13:22.455000+00:00",
+      "priority_score": 140,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Earn Mega Stones In Pokemon Legends Z A Ranked Battles Season 12",
+      "url": "https://www.pokemon.com/us/news/earn-mega-stones-in-pokemon-legends-z-a-ranked-battles-season-12",
+      "published_at": null,
+      "sitemap_lastmod": "2026-05-22T17:01:40.473000+00:00",
+      "priority_score": 140,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Earn Mega Stones In Pokemon Legends Z A Ranked Battles Season 11",
+      "url": "https://www.pokemon.com/us/news/earn-mega-stones-in-pokemon-legends-z-a-ranked-battles-season-11",
+      "published_at": null,
+      "sitemap_lastmod": "2026-05-05T15:44:12.912000+00:00",
+      "priority_score": 140,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "See The Full Glory Of Froakie Frogadier And Mega Greninja Ex",
@@ -23,24 +70,34 @@
       "sitemap_lastmod": "2026-04-29T23:27:45.856000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "suspected_generic_content",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
-      "title": "Gigantamax Pikachu Debuts In Pokemon Gos Upcoming Max Battle Day",
-      "url": "https://www.pokemon.com/us/news/gigantamax-pikachu-debuts-in-pokemon-gos-upcoming-max-battle-day",
+      "title": "Earn Mega Stones In Pokemon Legends Z A Ranked Battles Season 10",
+      "url": "https://www.pokemon.com/us/news/earn-mega-stones-in-pokemon-legends-z-a-ranked-battles-season-10",
       "published_at": null,
-      "sitemap_lastmod": "2026-03-26T16:02:57.961000+00:00",
+      "sitemap_lastmod": "2026-04-14T20:01:47.309000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Earn Mega Stones In Pokemon Legends Z A Ranked Battles Season 9",
+      "url": "https://www.pokemon.com/us/news/earn-mega-stones-in-pokemon-legends-z-a-ranked-battles-season-9",
+      "published_at": null,
+      "sitemap_lastmod": "2026-03-24T22:24:33.081000+00:00",
+      "priority_score": 140,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Rosas Encouragement Mega Zygarde Ex And More From Mega Evolution Perfect Order",
@@ -49,11 +106,22 @@
       "sitemap_lastmod": "2026-03-05T00:41:28.697000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "suspected_generic_content",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Earn Mega Shards In A Special Season Of Pokemon Legends Z A Ranked Battles Season 8",
+      "url": "https://www.pokemon.com/us/news/earn-mega-shards-in-a-special-season-of-pokemon-legends-z-a-ranked-battles-season-8",
+      "published_at": null,
+      "sitemap_lastmod": "2026-03-03T00:04:03.029000+00:00",
+      "priority_score": 140,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Mega Garchomp Z Comes To Pokemon Legends Z A Mega Dimension",
@@ -62,11 +130,10 @@
       "sitemap_lastmod": "2026-02-27T13:03:06.270000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Decidueye Ex Lapras Ex Lumiose City And More From Mega Evolution Perfect Order",
@@ -75,11 +142,10 @@
       "sitemap_lastmod": "2026-02-18T23:26:36.634000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "suspected_generic_content",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Erikas Victreebel Mega Audino Ex And More From Mega Evolution Ascended Heroes",
@@ -88,11 +154,10 @@
       "sitemap_lastmod": "2026-01-22T21:03:20.567000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "suspected_generic_content",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "New Mega Evolutions Added To The Pokemon Com Pokedex",
@@ -101,11 +166,10 @@
       "sitemap_lastmod": "2026-01-13T00:24:45.376000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Koraidon Ex Azumarill Ex Groudon And More From Mega Evolution Ascended Heroes",
@@ -114,11 +178,10 @@
       "sitemap_lastmod": "2025-12-12T22:58:07.690000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Collect Mega Evolved Pokemon Icons For Your Nintendo Switch Profile",
@@ -127,11 +190,10 @@
       "sitemap_lastmod": "2025-12-11T00:36:07.482000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Watch The Latest Pokemon Legends Z A Mega Dimension Trailer",
@@ -140,11 +202,10 @@
       "sitemap_lastmod": "2025-12-09T01:34:46.560000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Your Pokemon Legends Z A Mega Dimension Adventure Begins Today",
@@ -153,11 +214,10 @@
       "sitemap_lastmod": "2025-12-05T22:20:59.827000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Mewtwo Mega Mewtwo X And Mega Mewtwo Y Debut In Pokemon Legends Z A",
@@ -166,11 +226,10 @@
       "sitemap_lastmod": "2025-12-02T04:44:38.507000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Mega Lucario Z Debuts In Pokemon Legends Z A Mega Dimension",
@@ -179,11 +238,10 @@
       "sitemap_lastmod": "2025-12-02T04:43:44.853000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Mega Zeraora Makes Its Debut In Pokemon Legends Z A Mega Dimension",
@@ -192,11 +250,10 @@
       "sitemap_lastmod": "2025-11-19T12:53:04.346000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Watch The New Trailer For Pokemon Legends Z A Mega Dimension",
@@ -205,258 +262,167 @@
       "sitemap_lastmod": "2025-11-07T16:29:10.026000+00:00",
       "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
-    },
-    {
-      "title": "Ascend To New Heights During Pokemon Gos Mega Rayquaza Raid Day",
-      "url": "https://www.pokemon.com/us/news/ascend-to-new-heights-during-pokemon-gos-mega-rayquaza-raid-day",
-      "published_at": null,
-      "sitemap_lastmod": "2025-10-09T12:50:57.086000+00:00",
-      "priority_score": 110,
-      "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
-      "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
-    },
-    {
-      "title": "Mega Metagross Shadow Claws Into Pokemon Gos Mega Metagross Raid Day",
-      "url": "https://www.pokemon.com/us/news/mega-metagross-shadow-claws-into-pokemon-gos-mega-metagross-raid-day",
-      "published_at": null,
-      "sitemap_lastmod": "2025-10-02T17:38:07.836000+00:00",
-      "priority_score": 110,
-      "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
-      "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Pokemon Legends Z A Mega Dimension Is Coming Soon",
       "url": "https://www.pokemon.com/us/news/pokemon-legends-z-a-mega-dimension-is-coming-soon",
       "published_at": null,
       "sitemap_lastmod": "2025-09-12T14:38:21.028000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Meet Mega Malamar A Newly Discovered Mega Evolved Pokemon In Pokemon Legends Z A",
       "url": "https://www.pokemon.com/us/news/meet-mega-malamar-a-newly-discovered-mega-evolved-pokemon-in-pokemon-legends-z-a",
       "published_at": null,
       "sitemap_lastmod": "2025-09-10T13:22:26.575000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "suspected_generic_content",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Mega Hawlucha Enters The Ring In Pokemon Legends Z A",
       "url": "https://www.pokemon.com/us/news/mega-hawlucha-enters-the-ring-in-pokemon-legends-z-a",
       "published_at": null,
       "sitemap_lastmod": "2025-08-28T00:10:54.534000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Meet Mega Victreebel A Newly Discovered Mega Evolved Pokemon In Pokemon Legends Z A",
       "url": "https://www.pokemon.com/us/news/meet-mega-victreebel-a-newly-discovered-mega-evolved-pokemon-in-pokemon-legends-z-a",
       "published_at": null,
       "sitemap_lastmod": "2025-08-21T02:19:47.910000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "suspected_generic_content",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
-    },
-    {
-      "title": "Be Free On Pokemon Gos Gigantamax Butterfree Max Battle Day",
-      "url": "https://www.pokemon.com/us/news/be-free-on-pokemon-gos-gigantamax-butterfree-max-battle-day",
-      "published_at": null,
-      "sitemap_lastmod": "2025-07-24T21:38:52.217000+00:00",
-      "priority_score": 110,
-      "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
-      "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Visit The Pokemon Mega Evolution Experience Booth At Comic Con International",
       "url": "https://www.pokemon.com/us/news/visit-the-pokemon-mega-evolution-experience-booth-at-comic-con-international",
       "published_at": null,
       "sitemap_lastmod": "2025-07-22T20:39:52.498000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
-    },
-    {
-      "title": "Mega Lucario Power Up Punches Into Pokemon Gos Ultra Unlock Mega Lucario Raid Day",
-      "url": "https://www.pokemon.com/us/news/mega-lucario-power-up-punches-into-pokemon-gos-ultra-unlock-mega-lucario-raid-day",
-      "published_at": null,
-      "sitemap_lastmod": "2024-07-22T16:06:58.693000+00:00",
-      "priority_score": 110,
-      "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
-      "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Build A Heroic Pair With Mattels Mega Pokemon Ash Pikachu Path To Victory Set",
       "url": "https://www.pokemon.com/us/news/build-a-heroic-pair-with-mattels-mega-pokemon-ash-pikachu-path-to-victory-set",
       "published_at": null,
       "sitemap_lastmod": "2024-02-26T22:59:11.727000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
-    },
-    {
-      "title": "Celebrate Pokemon Unites 2Nd Anniversary With Mega Mewtwo X",
-      "url": "https://www.pokemon.com/us/news/celebrate-pokemon-unites-2nd-anniversary-with-mega-mewtwo-x",
-      "published_at": null,
-      "sitemap_lastmod": "2023-07-19T15:26:40.415000+00:00",
-      "priority_score": 110,
-      "announcement_category": "new_form_or_mega",
-      "inspection_status": "blocked",
-      "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
-    },
-    {
-      "title": "Mega Pinsir And Shiny Tapu Fini Debut In Pokemon Gos A Valorous Hero Event",
-      "url": "https://www.pokemon.com/us/news/mega-pinsir-and-shiny-tapu-fini-debut-in-pokemon-gos-a-valorous-hero-event",
-      "published_at": null,
-      "sitemap_lastmod": "2023-05-08T23:06:50.159000+00:00",
-      "priority_score": 110,
-      "announcement_category": "new_form_or_mega",
-      "inspection_status": "not_checked",
-      "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Download Mega Pokemon Digital Wallpapers",
       "url": "https://www.pokemon.com/us/news/download-mega-pokemon-digital-wallpapers",
       "published_at": null,
       "sitemap_lastmod": "2023-02-28T17:13:50.517000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "not_checked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Get Moving With Mattel S Mega Pokemon Motion Pikachu Building Set",
       "url": "https://www.pokemon.com/us/news/get-moving-with-mattel-s-mega-pokemon-motion-pikachu-building-set",
       "published_at": null,
       "sitemap_lastmod": "2022-08-22T15:55:47.605000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "not_checked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Join Max Raid Battles To Catch Milcery That Can Gigantamax After Evolving",
       "url": "https://www.pokemon.com/us/news/join-max-raid-battles-to-catch-milcery-that-can-gigantamax-after-evolving",
       "published_at": null,
       "sitemap_lastmod": "2022-07-07T16:31:03.078000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "not_checked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
-    },
-    {
-      "title": "Catch Gigantamax Venusaur Charizard And Blastoise In Max Raid Battles",
-      "url": "https://www.pokemon.com/us/news/catch-gigantamax-venusaur-charizard-and-blastoise-in-max-raid-battles",
-      "published_at": null,
-      "sitemap_lastmod": "2022-07-07T16:31:03.078000+00:00",
-      "priority_score": 110,
-      "announcement_category": "new_form_or_mega",
-      "inspection_status": "not_checked",
-      "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
-    },
-    {
-      "title": "Get Gigantamax Eevee And Gigantamax Pikachu Codes From Best Buy",
-      "url": "https://www.pokemon.com/us/news/get-gigantamax-eevee-and-gigantamax-pikachu-codes-from-best-buy",
-      "published_at": null,
-      "sitemap_lastmod": "2022-07-07T16:31:03.078000+00:00",
-      "priority_score": 110,
-      "announcement_category": "new_form_or_mega",
-      "inspection_status": "not_checked",
-      "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
-    },
-    {
-      "title": "Challenge Gigantamax Urshifu In Max Raid Battles",
-      "url": "https://www.pokemon.com/us/news/challenge-gigantamax-urshifu-in-max-raid-battles",
-      "published_at": null,
-      "sitemap_lastmod": "2022-07-07T16:31:03.078000+00:00",
-      "priority_score": 110,
-      "announcement_category": "new_form_or_mega",
-      "inspection_status": "not_checked",
-      "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     },
     {
       "title": "Gigantamax Charizard Gigantamax Copperajah And More In Max Raid Battles",
       "url": "https://www.pokemon.com/us/news/gigantamax-charizard-gigantamax-copperajah-and-more-in-max-raid-battles",
       "published_at": null,
       "sitemap_lastmod": "2022-07-07T16:31:03.078000+00:00",
-      "priority_score": 110,
+      "priority_score": 140,
       "announcement_category": "new_form_or_mega",
-      "inspection_status": "not_checked",
+      "inspection_status": "metadata_only",
       "title_signal_only": true,
-      "announcement_evidence": [],
-      "name_candidates_for_review": [],
-      "verified_new_species": false
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Get Gigantamax Eevee And Gigantamax Pikachu Codes From Best Buy",
+      "url": "https://www.pokemon.com/us/news/get-gigantamax-eevee-and-gigantamax-pikachu-codes-from-best-buy",
+      "published_at": null,
+      "sitemap_lastmod": "2022-07-07T16:31:03.078000+00:00",
+      "priority_score": 140,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Challenge Gigantamax Urshifu In Max Raid Battles",
+      "url": "https://www.pokemon.com/us/news/challenge-gigantamax-urshifu-in-max-raid-battles",
+      "published_at": null,
+      "sitemap_lastmod": "2022-07-07T16:31:03.078000+00:00",
+      "priority_score": 140,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Catch Gigantamax Venusaur Charizard And Blastoise In Max Raid Battles",
+      "url": "https://www.pokemon.com/us/news/catch-gigantamax-venusaur-charizard-and-blastoise-in-max-raid-battles",
+      "published_at": null,
+      "sitemap_lastmod": "2022-07-07T16:31:03.078000+00:00",
+      "priority_score": 140,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
     }
-  ]
+  ],
+  "notice": "Signaux basés sur les titres et métadonnées, non des espèces confirmées."
 }

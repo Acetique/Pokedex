@@ -1,0 +1,132 @@
+{
+  "version": "5.7",
+  "checked_at": "2026-10-13T04:18:26.945902+00:00",
+  "catalogue_status": "ok",
+  "news_status": "degraded_archive_only",
+  "news_mode": "metadata_only",
+  "news_articles_downloaded": 0,
+  "new_species_verification": "pokeapi",
+  "priority_announcements": 35,
+  "errors": [
+    {
+      "source": "https://www.pokemon.com/el/destacados/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/el/noticias/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/es/destacados/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/es/noticias/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/fr/articles/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/fr/actualites/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/it/approfondimenti/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/it/novita/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/uk/features/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/uk/news/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/us/features/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/us/news/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/us/pokemon-video-games/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/uk/pokemon-video-games/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/fr/jeux-video-pokemon/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/it/videogiochi/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/de/pokemon-videospiele/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/es/videojuegos-pokemon/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/el/videojuegos-pokemon/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/us/pokemon-tcg/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/uk/pokemon-tcg/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/fr/jcc-pokemon/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/it/gcc/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/de/pokemon-sammelkartenspiel/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/es/jcc-pokemon/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/el/jcc-pokemon/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/br/pokemon-estampas-ilustradas/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/us/animation/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/uk/animation/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    },
+    {
+      "source": "https://www.pokemon.com/fr/dessins-animes/sitemap.xml",
+      "error": "not well-formed (invalid token): line 34, column 17"
+    }
+  ]
+}
