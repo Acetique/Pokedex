@@ -3,25 +3,26 @@
 # -*- coding: utf-8 -*-
 
 """
-POKEDEX V5.0
-Actualisation automatique depuis PokéAPI
-et découverte d'actualités officielles Pokémon.
+POKEDEX V5.1
+Détection des nouveaux Pokémon annoncés officiellement.
 
 Fonctions :
-- Actualiser le nombre de Pokémon depuis PokéAPI
-- Actualiser les plages des générations
-- Préserver les trois starters provisoires
-- Explorer la page officielle d'actualités
-- Lire les données structurées JSON-LD
-- Rechercher les liens dans les sitemaps officiels
-- Identifier les mentions de Pokémon connus
-- Préparer les noms inconnus pour vérification
-- Conserver les articles déjà découverts
-- Enregistrer les erreurs et diagnostics
-- Publier les données JSON pour GitHub Pages
+1. Actualisation automatique de PokéAPI
+2. Mise à jour du catalogue et des générations
+3. Préservation des starters provisoires
+4. Recherche d'articles sur pokemon.com
+5. Analyse des titres et du contenu des articles
+6. Détection des annonces de nouvelles espèces
+7. Comparaison avec les Pokémon déjà connus
+8. Réduction des faux positifs
+9. Création de pokemon-a-verifier.json
+10. Journalisation des erreurs et diagnostics
 
-Aucune espèce non vérifiée n'est ajoutée
-automatiquement au catalogue principal.
+Aucune nouvelle espèce n'est ajoutée au catalogue
+sans validation des informations officielles.
+
+Compatible avec Python 3.12 et GitHub Actions.
+Aucune dépendance externe.
 """
 
 import datetime as dt
@@ -31,7 +32,6 @@ import json
 from pathlib import Path
 import re
 import time
-import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -43,58 +43,76 @@ API = "https://pokeapi.co/api/v2"
 OFFICIAL_SITE = "https://www.pokemon.com"
 NEWS_URL = OFFICIAL_SITE + "/us/pokemon-news"
 
-USER_AGENT = (
-    "CommunityPokedex/5.0 "
-    "(automated official news index checker)"
-)
-
 HEADERS = {
-    "User-Agent": USER_AGENT,
+    "User-Agent": "CommunityPokedex/5.1",
     "Accept": (
-        "application/json,application/xml,"
-        "text/xml,text/html;q=0.9,*/*;q=0.5"
+        "application/json,text/html,"
+        "application/xml,text/xml;q=0.9,*/*;q=0.5"
     ),
 }
 
-MAX_ARTICLES = 80
-MAX_SITEMAPS = 12
-MAX_SITEMAP_URLS = 5000
+MAX_ARTICLES = 60
+MAX_ARTICLE_FETCHES = 25
+MAX_SITEMAPS = 8
 REQUEST_DELAY = 0.5
 
-NEWS_PATH_MARKERS = (
-    "/pokemon-news/",
-    "/news/",
+NEWS_MARKERS = (
+    "/us/news/",
+    "/us/pokemon-news/",
+    "/fr/actualites/",
 )
 
-# Les noms suivants ne sont pas des espèces
-# à considérer automatiquement comme confirmées.
-GENERIC_WORDS = {
-    "Pokemon",
-    "Pokémon",
-    "News",
-    "Video",
-    "Game",
-    "Games",
-    "Official",
-    "Nintendo",
-    "Trading",
-    "Card",
-    "Cards",
-    "Scarlet",
-    "Violet",
-    "Legends",
-    "Champions",
-    "Mega",
-    "Evolution",
-    "New",
-    "Update",
-    "October",
-    "November",
-    "December",
+# Indices qu'un article pourrait annoncer
+# une nouvelle espèce de Pokémon.
+ANNOUNCEMENT_PATTERNS = [
+    r"\bnew(?:ly)? discovered pok[eé]mon\b",
+    r"\bnew pok[eé]mon (?:revealed|discovered|unveiled)\b",
+    r"\bmeet (?:the )?new pok[eé]mon\b",
+    r"\bintroducing (?:the )?new pok[eé]mon\b",
+    r"\bnew species of pok[eé]mon\b",
+    r"\bnever.before.seen pok[eé]mon\b",
+    r"\bnouveau[x]? pok[eé]mon\b",
+    r"\bnouvelle esp[eè]ce de pok[eé]mon\b",
+    r"\bd[eé]couvrez (?:les? )?nouveaux pok[eé]mon\b",
+    r"\bpok[eé]mon in[eé]dit[s]?\b",
+]
+
+# Mots fréquemment présents dans les titres
+# qui ne sont pas des noms de Pokémon.
+EXCLUDED_WORDS = {
+    "Pokemon", "Pokémon", "New", "Meet", "Introducing",
+    "Revealed", "Discover", "Discovered", "Official",
+    "News", "Update", "Updates", "Game", "Games",
+    "Nintendo", "Switch", "Center", "Store",
+    "Home", "Community", "Event", "Events",
+    "Season", "Series", "Movie", "Movies",
+    "Netflix", "Amazon", "Apple", "YouTube",
+    "Trading", "Card", "Cards", "TCG",
+    "Scarlet", "Violet", "Legends",
+    "Pokopia", "Champions", "GO",
+    "Version", "Online", "Competition",
+    "October", "November", "December",
+    "January", "February", "March", "April",
+    "May", "June", "July", "August", "September",
+    "Today", "Tomorrow", "Learn", "More",
+    "Details", "Features", "Available",
+    "Coming", "Get", "Your", "Look",
+    "Ready", "Night", "Out", "Celebrate",
+    "Quality", "Life", "Improvements",
+    "Global", "Challenge", "Museum",
+    "World", "Space", "Agency",
+    "Pokédex", "Pokedex",
+}
+
+# Les trois starters ajoutés manuellement
+# sont déjà connus par le site.
+MANUAL_POKEMON = {
+    "browt", "pombon", "gecqua",
+    "broussatif", "caloulou", "ogéko",
 }
 
 
-def utc_now():
+def now():
     return dt.datetime.now(
         dt.timezone.utc
     ).isoformat()
@@ -102,20 +120,19 @@ def utc_now():
 
 def log(message):
     print(
-        "[POKEDEX V5.0]",
-        message,
+        "[POKEDEX V5.1] " + str(message),
         flush=True
     )
 
 
-def write_json(path, content):
+def save_json(path, value):
     path.parent.mkdir(
         parents=True,
         exist_ok=True
     )
 
-    encoded = json.dumps(
-        content,
+    content = json.dumps(
+        value,
         ensure_ascii=False,
         indent=2
     ) + "\n"
@@ -124,29 +141,26 @@ def write_json(path, content):
         not path.exists()
         or path.read_text(
             encoding="utf-8"
-        ) != encoded
+        ) != content
     ):
         path.write_text(
-            encoded,
+            content,
             encoding="utf-8"
         )
 
 
-def read_json(path, default=None):
-    if not path.exists():
-        return default
-
+def load_json(path, default=None):
     try:
         return json.loads(
             path.read_text(
                 encoding="utf-8"
             )
         )
-    except (ValueError, OSError):
+    except (OSError, ValueError):
         return default
 
 
-def download(url, timeout=25):
+def fetch(url, timeout=25):
     request = urllib.request.Request(
         url,
         headers=HEADERS
@@ -156,27 +170,21 @@ def download(url, timeout=25):
         request,
         timeout=timeout
     ) as response:
-        content_type = response.headers.get(
-            "Content-Type", ""
+        charset = (
+            response.headers.get_content_charset()
+            or "utf-8"
         )
 
-        raw = response.read(8_000_000)
-
-        charset = response.headers.get_content_charset()
-        charset = charset or "utf-8"
-
-        return (
-            raw.decode(
-                charset,
-                errors="replace"
-            ),
-            content_type
+        return response.read(
+            8_000_000
+        ).decode(
+            charset,
+            errors="replace"
         )
 
 
-def get_json(url):
-    content, _ = download(url)
-    return json.loads(content)
+def fetch_json(url):
+    return json.loads(fetch(url))
 
 
 def species_id(url):
@@ -185,22 +193,28 @@ def species_id(url):
         url
     )
 
-    if match:
-        return int(match.group(1))
+    return (
+        int(match.group(1))
+        if match else None
+    )
 
-    return None
+
+def clean_text(value):
+    value = html.unescape(
+        str(value or "")
+    )
+
+    return " ".join(
+        value.split()
+    )
 
 
-def normalize_url(url, base=OFFICIAL_SITE):
+def official_url(url, base=NEWS_URL):
     if not isinstance(url, str):
         return None
 
-    absolute = urllib.parse.urljoin(
-        base, url
-    )
-
     parsed = urllib.parse.urlparse(
-        absolute
+        urllib.parse.urljoin(base, url)
     )
 
     if parsed.scheme != "https":
@@ -222,353 +236,169 @@ def normalize_url(url, base=OFFICIAL_SITE):
     ))
 
 
-def is_news_url(url):
-    parsed = urllib.parse.urlparse(url)
-    path = parsed.path.lower()
+def is_article(url):
+    path = urllib.parse.urlparse(
+        url
+    ).path.lower()
 
     if path.rstrip("/") in (
         "/us/pokemon-news",
-        "/us/news"
+        "/us/news",
+        "/fr/actualites"
     ):
         return False
 
     return any(
         marker in path
-        for marker in NEWS_PATH_MARKERS
+        for marker in NEWS_MARKERS
     )
 
 
-class LinkParser(HTMLParser):
+class ArticleHTMLParser(HTMLParser):
     def __init__(self):
-        super().__init__()
+        super().__init__(
+            convert_charrefs=True
+        )
 
         self.links = []
-        self.scripts = []
+        self.jsonld = []
+        self.paragraphs = []
+        self.heading = []
+
         self.current_link = None
-        self.current_text = []
+        self.link_text = []
+
         self.in_jsonld = False
         self.jsonld_text = []
 
+        self.in_text = False
+        self.text_buffer = []
+
+        self.ignored_depth = 0
+
     def handle_starttag(self, tag, attrs):
-        attributes = dict(attrs)
+        attrs = dict(attrs)
 
-        if tag == "a":
-            self.current_link = attributes.get(
-                "href"
-            )
-            self.current_text = []
-
-        if tag == "script":
-            script_type = attributes.get(
-                "type", ""
-            ).lower()
-
-            if "ld+json" in script_type:
+        if tag in ("script", "style", "nav"):
+            if tag == "script" and (
+                "ld+json" in attrs.get(
+                    "type", ""
+                ).lower()
+            ):
                 self.in_jsonld = True
                 self.jsonld_text = []
+            else:
+                self.ignored_depth += 1
+
+        if tag == "a":
+            self.current_link = attrs.get(
+                "href"
+            )
+            self.link_text = []
+
+        if (
+            tag in (
+                "p", "h1", "h2", "h3"
+            )
+            and self.ignored_depth == 0
+        ):
+            self.in_text = True
+            self.text_buffer = []
 
     def handle_data(self, data):
         if self.current_link is not None:
-            self.current_text.append(data)
+            self.link_text.append(data)
 
         if self.in_jsonld:
             self.jsonld_text.append(data)
 
+        if (
+            self.in_text
+            and self.ignored_depth == 0
+        ):
+            self.text_buffer.append(data)
+
     def handle_endtag(self, tag):
         if tag == "a":
             if self.current_link:
-                title = " ".join(
-                    " ".join(
-                        self.current_text
-                    ).split()
-                )
-
                 self.links.append({
                     "url": self.current_link,
-                    "title": html.unescape(title)
+                    "title": clean_text(
+                        " ".join(self.link_text)
+                    )
                 })
 
             self.current_link = None
-            self.current_text = []
+            self.link_text = []
 
-        if tag == "script" and self.in_jsonld:
-            raw = "".join(
-                self.jsonld_text
-            ).strip()
-
-            if raw:
-                self.scripts.append(raw)
-
-            self.in_jsonld = False
-            self.jsonld_text = []
-
-
-def extract_jsonld_articles(value):
-    articles = []
-
-    def visit(node):
-        if isinstance(node, list):
-            for item in node:
-                visit(item)
-            return
-
-        if not isinstance(node, dict):
-            return
-
-        kind = node.get("@type", [])
-        kinds = kind if isinstance(
-            kind, list
-        ) else [kind]
-
-        if any(
-            k in (
-                "NewsArticle",
-                "Article",
-                "BlogPosting"
-            )
-            for k in kinds
-        ):
-            headline = node.get(
-                "headline", ""
-            )
-
-            url = node.get(
-                "url",
-                node.get("mainEntityOfPage")
-            )
-
-            if isinstance(url, dict):
-                url = url.get("@id")
-
-            if isinstance(
-                headline, str
-            ) and isinstance(url, str):
-                articles.append({
-                    "title": headline,
-                    "url": url,
-                    "published_at": node.get(
-                        "datePublished"
-                    )
-                })
-
-        for child in node.values():
-            if isinstance(
-                child, (list, dict)
-            ):
-                visit(child)
-
-    visit(value)
-    return articles
-
-
-def discover_html_articles(page_html):
-    parser = LinkParser()
-    parser.feed(page_html)
-
-    found = []
-
-    for item in parser.links:
-        url = normalize_url(
-            item["url"], NEWS_URL
-        )
-
-        if not url or not is_news_url(url):
-            continue
-
-        title = item["title"].strip()
-
-        if len(title) < 8:
-            title = url.rstrip("/").split("/")[-1]
-            title = title.replace("-", " ").title()
-
-        found.append({
-            "title": title[:220],
-            "url": url,
-            "discovery_method": "html_link"
-        })
-
-    for raw in parser.scripts:
-        try:
-            structured = json.loads(raw)
-        except ValueError:
-            continue
-
-        for article in extract_jsonld_articles(
-            structured
-        ):
-            url = normalize_url(
-                article["url"],
-                NEWS_URL
-            )
-
-            if not url or not is_news_url(url):
-                continue
-
-            found.append({
-                "title": article["title"][:220],
-                "url": url,
-                "published_at": article.get(
-                    "published_at"
-                ),
-                "discovery_method": "json_ld"
-            })
-
-    return found
-
-
-def discover_sitemap_roots():
-    roots = [
-        OFFICIAL_SITE + "/sitemap.xml"
-    ]
-
-    try:
-        content, _ = download(
-            OFFICIAL_SITE + "/robots.txt"
-        )
-
-        for line in content.splitlines():
-            if line.lower().startswith(
-                "sitemap:"
-            ):
-                value = line.split(
-                    ":", 1
-                )[1].strip()
-
-                url = normalize_url(value)
-
-                if url:
-                    roots.append(url)
-
-    except Exception as exc:
-        log(
-            "robots.txt indisponible : "
-            + str(exc)
-        )
-
-    return list(dict.fromkeys(roots))
-
-
-def discover_sitemap_articles():
-    queue = discover_sitemap_roots()
-    visited = set()
-    found = []
-    errors = []
-    inspected_urls = 0
-
-    while (
-        queue
-        and len(visited) < MAX_SITEMAPS
-        and inspected_urls < MAX_SITEMAP_URLS
-    ):
-        sitemap_url = queue.pop(0)
-
-        if sitemap_url in visited:
-            continue
-
-        visited.add(sitemap_url)
-
-        try:
-            content, _ = download(
-                sitemap_url
-            )
-
-            root = ET.fromstring(content)
-
-        except Exception as exc:
-            errors.append({
-                "url": sitemap_url,
-                "error": str(exc)[:200]
-            })
-            continue
-
-        root_name = root.tag.split("}")[-1]
-
-        if root_name == "sitemapindex":
-            for element in root.iter():
-                if element.tag.split("}")[-1] != "loc":
-                    continue
-
-                value = (
-                    element.text or ""
+        if tag == "script":
+            if self.in_jsonld:
+                raw = "".join(
+                    self.jsonld_text
                 ).strip()
 
-                url = normalize_url(value)
+                if raw:
+                    self.jsonld.append(raw)
 
-                if (
-                    url
-                    and url not in visited
-                    and len(queue) < 100
-                ):
-                    queue.append(url)
+                self.in_jsonld = False
 
-        elif root_name == "urlset":
-            for entry in root:
-                if entry.tag.split("}")[-1] != "url":
-                    continue
+            elif self.ignored_depth > 0:
+                self.ignored_depth -= 1
 
-                inspected_urls += 1
+        if tag in ("style", "nav"):
+            if self.ignored_depth > 0:
+                self.ignored_depth -= 1
 
-                url = None
-                lastmod = None
-
-                for child in entry:
-                    key = child.tag.split("}")[-1]
-
-                    if key == "loc":
-                        url = normalize_url(
-                            child.text or ""
-                        )
-
-                    elif key == "lastmod":
-                        lastmod = child.text
-
-                if url and is_news_url(url):
-                    title = (
-                        url.rstrip("/")
-                        .split("/")[-1]
-                        .replace("-", " ")
-                        .title()
-                    )
-
-                    found.append({
-                        "title": title,
-                        "url": url,
-                        "published_at": lastmod,
-                        "discovery_method": "sitemap"
-                    })
-
-                if inspected_urls >= MAX_SITEMAP_URLS:
-                    break
-
-        time.sleep(REQUEST_DELAY)
-
-    return found, {
-        "sitemaps_checked": len(visited),
-        "urls_inspected": inspected_urls,
-        "errors": errors
-    }
-
-
-def merge_articles(*collections):
-    merged = {}
-
-    for collection in collections:
-        for item in collection:
-            if not isinstance(item, dict):
-                continue
-
-            url = normalize_url(
-                item.get("url", "")
+        if tag in ("p", "h1", "h2", "h3"):
+            text = clean_text(
+                " ".join(self.text_buffer)
             )
 
-            if not url or not is_news_url(url):
+            if len(text) >= 15:
+                self.paragraphs.append(text)
+
+            if (
+                tag.startswith("h")
+                and text
+            ):
+                self.heading.append(text)
+
+            self.in_text = False
+            self.text_buffer = []
+
+
+def parse_html(content):
+    parser = ArticleHTMLParser()
+    parser.feed(content)
+    return parser
+
+
+def discover_news():
+    log("Recherche des articles officiels")
+
+    found = []
+    diagnostics = {
+        "html_links": 0,
+        "sitemap_links": 0,
+        "errors": []
+    }
+
+    try:
+        parser = parse_html(
+            fetch(NEWS_URL)
+        )
+
+        for item in parser.links:
+            url = official_url(
+                item["url"]
+            )
+
+            if not url or not is_article(url):
                 continue
 
-            title = str(
-                item.get("title") or ""
-            ).strip()
+            title = item["title"]
 
-            if not title:
+            if len(title) < 8:
                 title = (
                     url.rstrip("/")
                     .split("/")[-1]
@@ -576,75 +406,273 @@ def merge_articles(*collections):
                     .title()
                 )
 
-            if url not in merged:
-                merged[url] = {
-                    "title": title[:220],
-                    "url": url,
-                    "published_at": item.get(
-                        "published_at"
-                    ),
-                    "discovery_method": item.get(
-                        "discovery_method",
-                        "previous_scan"
-                    )
-                }
+            found.append({
+                "title": title,
+                "url": url,
+                "discovery_method": "html_link"
+            })
 
-            else:
-                old = merged[url]
+        diagnostics["html_links"] = len(
+            found
+        )
 
-                if len(title) > len(old["title"]):
-                    old["title"] = title[:220]
+    except Exception as exc:
+        diagnostics["errors"].append({
+            "source": NEWS_URL,
+            "error": str(exc)[:200]
+        })
 
+    # On explore uniquement les sitemaps
+    # anglophones directement pertinents.
+    sitemap_urls = [
+        OFFICIAL_SITE + "/us/news/sitemap.xml",
+        OFFICIAL_SITE + "/us/pokemon-news/sitemap.xml",
+        OFFICIAL_SITE + "/sitemap.xml"
+    ]
+
+    for sitemap in sitemap_urls[:MAX_SITEMAPS]:
+        try:
+            raw = fetch(sitemap)
+            root = ET.fromstring(raw)
+
+            for element in root.iter():
                 if (
-                    not old.get("published_at")
-                    and item.get("published_at")
+                    element.tag.split("}")[-1]
+                    != "loc"
                 ):
-                    old["published_at"] = item[
-                        "published_at"
-                    ]
+                    continue
 
-    return list(merged.values())
+                url = official_url(
+                    element.text or ""
+                )
+
+                if not url or not is_article(url):
+                    continue
+
+                found.append({
+                    "title": (
+                        url.rstrip("/")
+                        .split("/")[-1]
+                        .replace("-", " ")
+                        .title()
+                    ),
+                    "url": url,
+                    "discovery_method": "sitemap"
+                })
+
+                diagnostics[
+                    "sitemap_links"
+                ] += 1
+
+        except Exception as exc:
+            diagnostics["errors"].append({
+                "source": sitemap,
+                "error": str(exc)[:200]
+            })
+
+        time.sleep(REQUEST_DELAY)
+
+    unique = {}
+
+    for article in found:
+        url = article["url"]
+
+        if url not in unique:
+            unique[url] = article
+
+        elif (
+            article["discovery_method"]
+            == "html_link"
+        ):
+            unique[url] = article
+
+    return (
+        list(unique.values())[:MAX_ARTICLES],
+        diagnostics
+    )
+
+
+def announcement_sentences(text):
+    sentences = re.split(
+        r"(?<=[.!?])\s+",
+        text
+    )
+
+    evidence = []
+
+    for sentence in sentences:
+        if any(
+            re.search(
+                pattern,
+                sentence,
+                re.IGNORECASE
+            )
+            for pattern in ANNOUNCEMENT_PATTERNS
+        ):
+            evidence.append(
+                sentence[:500]
+            )
+
+    return evidence[:8]
+
+
+def candidate_names(text, known_names):
+    """
+    Extraction prudente de noms candidats.
+
+    Les noms propres seuls ne sont pas
+    une preuve de nouvelle espèce.
+    """
+    matches = re.findall(
+        r"\b[A-Z][a-z]{3,}(?:[-'][A-Z]?[a-z]+)?\b",
+        text
+    )
+
+    results = []
+
+    for value in matches:
+        lowered = value.lower()
+
+        if value in EXCLUDED_WORDS:
+            continue
+
+        if lowered in known_names:
+            continue
+
+        if lowered in MANUAL_POKEMON:
+            continue
+
+        if len(value) > 22:
+            continue
+
+        if value not in results:
+            results.append(value)
+
+    return results[:30]
+
+
+def known_mentions(text, known_names):
+    normalized = re.sub(
+        r"[^a-z0-9-]",
+        " ",
+        text.lower()
+    )
+
+    words = set(
+        normalized.split()
+    )
+
+    return sorted(
+        name
+        for name in known_names
+        if name in words
+    )[:30]
+
+
+def inspect_article(article, known_names):
+    result = dict(article)
+
+    result["published_at"] = None
+    result["announcement_evidence"] = []
+    result["known_pokemon_mentions"] = []
+    result["name_candidates_for_review"] = []
+    result["verified_new_species"] = False
+    result["inspection_status"] = "not_checked"
+
+    try:
+        page = fetch(
+            article["url"]
+        )
+
+        parser = parse_html(page)
+
+        body = " ".join(
+            parser.paragraphs
+        )[:30000]
+
+        title = article["title"]
+
+        text = title + ". " + body
+
+        evidence = announcement_sentences(
+            text
+        )
+
+        result[
+            "announcement_evidence"
+        ] = evidence
+
+        result[
+            "known_pokemon_mentions"
+        ] = known_mentions(
+            text,
+            known_names
+        )
+
+        # Les noms candidats sont retenus
+        # uniquement s'il existe des indices
+        # d'annonce dans l'article.
+        if evidence:
+            evidence_text = " ".join(
+                evidence
+            )
+
+            result[
+                "name_candidates_for_review"
+            ] = candidate_names(
+                evidence_text,
+                known_names
+            )
+
+        result["inspection_status"] = "ok"
+
+    except Exception as exc:
+        result["inspection_status"] = "error"
+        result["inspection_error"] = str(
+            exc
+        )[:200]
+
+    return result
 
 
 def update_pokeapi():
-    log("Vérification de PokéAPI")
+    log("Actualisation PokéAPI")
 
-    species = get_json(
+    species = fetch_json(
         API + "/pokemon-species?limit=2000"
     )["results"]
 
     ids = [
-        species_id(p["url"])
-        for p in species
+        species_id(item["url"])
+        for item in species
     ]
 
     ids = [
-        number
-        for number in ids
+        number for number in ids
         if number is not None
     ]
 
     if not ids:
         raise RuntimeError(
-            "Aucune espèce trouvée dans PokéAPI"
+            "Aucun Pokémon récupéré"
         )
 
     max_id = max(ids)
 
-    generations = get_json(
+    generations = fetch_json(
         API + "/generation?limit=100"
     )["results"]
 
     ranges = []
 
     for generation in generations:
-        detail = get_json(
+        details = fetch_json(
             generation["url"]
         )
 
         values = [
             species_id(p["url"])
-            for p in detail.get(
+            for p in details.get(
                 "pokemon_species", []
             )
         ]
@@ -662,11 +690,9 @@ def update_pokeapi():
             ])
 
     ranges.sort(
-        key=lambda pair: pair[0]
+        key=lambda item: item[0]
     )
 
-    # Conservation des starters provisoires
-    # avec les numéros locaux 1026 à 1028.
     if max_id < 1028:
         if len(ranges) < 10:
             ranges.append([
@@ -675,29 +701,23 @@ def update_pokeapi():
             ])
         else:
             ranges[-1][1] = max(
-                ranges[-1][1],
-                1028
+                ranges[-1][1], 1028
             )
 
     page = ROOT / "index.html"
-
-    if not page.exists():
-        raise FileNotFoundError(
-            "index.html introuvable"
-        )
 
     original = page.read_text(
         encoding="utf-8"
     )
 
-    updated, max_matches = re.subn(
+    updated, count_max = re.subn(
         r"MAX=\d+,PAGE=",
         f"MAX={max_id},PAGE=",
         original,
         count=1
     )
 
-    updated, range_matches = re.subn(
+    updated, count_ranges = re.subn(
         r"const genRanges=\[\[.*?\]\];",
         "const genRanges="
         + json.dumps(
@@ -709,14 +729,9 @@ def update_pokeapi():
         count=1
     )
 
-    if max_matches != 1:
+    if count_max != 1 or count_ranges != 1:
         raise RuntimeError(
-            "Marqueur MAX introuvable dans index.html"
-        )
-
-    if range_matches != 1:
-        raise RuntimeError(
-            "Marqueur genRanges introuvable"
+            "Structure de index.html incompatible"
         )
 
     updated = updated.replace(
@@ -731,16 +746,10 @@ def update_pokeapi():
             encoding="utf-8"
         )
 
-        log(
-            "index.html actualisé"
-        )
-
-    checked_at = utc_now()
-
-    write_json(
+    save_json(
         DATA / "catalogue-status.json",
         {
-            "checked_at": checked_at,
+            "checked_at": now(),
             "pokeapi_max_species_id": max_id,
             "generation_ranges": ranges,
             "source": (
@@ -760,206 +769,200 @@ def update_pokeapi():
     }
 
 
-def find_known_pokemon(text, known_names):
-    normalized = text.lower()
-    normalized = re.sub(
-        r"[^a-z0-9 -]",
-        " ",
-        normalized
-    )
-
-    words = set(
-        normalized.split()
-    )
-
-    return sorted(
-        name
-        for name in known_names
-        if name in words
-    )
-
-
-def find_review_candidates(title):
-    """
-    Recherche indicative de noms propres.
-
-    Ces candidats ne sont jamais considérés
-    comme de nouvelles espèces confirmées.
-    """
-    candidates = re.findall(
-        r"\b[A-Z][a-z]{3,}(?:[- ][A-Z][a-z]{3,})?\b",
-        title
-    )
-
-    return sorted({
-        value
-        for value in candidates
-        if value not in GENERIC_WORDS
-    })[:12]
-
-
-def update_official_news(known_names):
-    log(
-        "Recherche des actualités officielles"
-    )
-
-    previous = read_json(
+def update_news(known_names):
+    previous = load_json(
         DATA / "nouveautes-pokemon.json",
         {}
     ) or {}
 
-    previous_articles = previous.get(
+    discovered, diagnostics = discover_news()
+
+    old_articles = previous.get(
         "articles", []
     )
 
-    html_articles = []
-    sitemap_articles = []
-    errors = []
-
-    html_success = False
-    sitemap_success = False
-
-    try:
-        content, _ = download(
-            NEWS_URL
-        )
-
-        html_success = True
-
-        html_articles = discover_html_articles(
-            content
-        )
-
-        log(
-            f"Liens HTML détectés : "
-            f"{len(html_articles)}"
-        )
-
-    except Exception as exc:
-        errors.append({
-            "source": NEWS_URL,
-            "error": str(exc)[:200]
-        })
-
-    sitemap_diagnostics = {}
-
-    try:
-        (
-            sitemap_articles,
-            sitemap_diagnostics
-        ) = discover_sitemap_articles()
-
-        sitemap_success = (
-            sitemap_diagnostics.get(
-                "sitemaps_checked", 0
-            ) > len(
-                sitemap_diagnostics.get(
-                    "errors", []
-                )
-            )
-        )
-
-        log(
-            f"Liens sitemap détectés : "
-            f"{len(sitemap_articles)}"
-        )
-
-    except Exception as exc:
-        errors.append({
-            "source": "sitemaps",
-            "error": str(exc)[:200]
-        })
-
-    articles = merge_articles(
-        html_articles,
-        sitemap_articles,
-        previous_articles
-    )
-
-    # Les articles découverts pendant ce scan
-    # passent avant les archives conservées.
-    articles = articles[:MAX_ARTICLES]
-
-    for article in articles:
-        title = article["title"]
-
-        article["known_pokemon_mentions"] = (
-            find_known_pokemon(
-                title,
-                known_names
-            )
-        )
-
-        article["name_candidates_for_review"] = (
-            find_review_candidates(title)
-        )
-
-        article["verified_new_species"] = False
-
-    if html_articles or sitemap_articles:
-        status = "ok"
-
-    elif html_success or sitemap_success:
-        status = "no_articles_detected"
-
-    else:
-        status = "source_unavailable"
-
-    checked_at = utc_now()
-
-    result = {
-        "checked_at": checked_at,
-        "status": status,
-        "source": NEWS_URL,
-        "articles": articles,
-        "diagnostics": {
-            "html_articles_found": len(
-                html_articles
-            ),
-            "sitemap_articles_found": len(
-                sitemap_articles
-            ),
-            "retained_articles": len(
-                articles
-            ),
-            "sitemap": sitemap_diagnostics,
-            "errors": errors
-        },
-        "notice": (
-            "Les articles sont issus de sources "
-            "officielles accessibles. Les candidats "
-            "de noms nécessitent une vérification "
-            "humaine avant ajout au Pokédex."
-        )
+    existing_urls = {
+        article["url"]
+        for article in discovered
     }
 
-    write_json(
-        DATA / "nouveautes-pokemon.json",
-        result
+    for article in old_articles:
+        if not isinstance(
+            article, dict
+        ):
+            continue
+
+        url = official_url(
+            article.get("url", "")
+        )
+
+        if (
+            url
+            and is_article(url)
+            and url not in existing_urls
+        ):
+            discovered.append({
+                "title": article.get(
+                    "title", ""
+                ),
+                "url": url,
+                "discovery_method": (
+                    "previous_scan"
+                )
+            })
+
+            existing_urls.add(url)
+
+    discovered = discovered[:MAX_ARTICLES]
+
+    inspected = []
+
+    for index, article in enumerate(
+        discovered
+    ):
+        if index < MAX_ARTICLE_FETCHES:
+            inspected.append(
+                inspect_article(
+                    article,
+                    known_names
+                )
+            )
+
+            time.sleep(
+                REQUEST_DELAY
+            )
+
+        else:
+            item = dict(article)
+
+            item[
+                "inspection_status"
+            ] = "not_checked"
+
+            item[
+                "verified_new_species"
+            ] = False
+
+            inspected.append(item)
+
+    candidates = []
+
+    for article in inspected:
+        evidence = article.get(
+            "announcement_evidence", []
+        )
+
+        if not evidence:
+            continue
+
+        for name in article.get(
+            "name_candidates_for_review", []
+        ):
+            candidates.append({
+                "name": name,
+                "source_title": article["title"],
+                "source_url": article["url"],
+                "evidence": evidence[:3],
+                "status": "requires_manual_review",
+                "verified": False
+            })
+
+    # Déduplication par nom et source.
+    unique_candidates = {}
+
+    for candidate in candidates:
+        key = (
+            candidate["name"].lower(),
+            candidate["source_url"]
+        )
+
+        unique_candidates[key] = candidate
+
+    candidates = list(
+        unique_candidates.values()
     )
 
-    write_json(
+    checked_at = now()
+
+    if discovered:
+        status = "ok"
+
+    elif diagnostics["errors"]:
+        status = "source_unavailable"
+
+    else:
+        status = "no_articles_detected"
+
+    save_json(
+        DATA / "nouveautes-pokemon.json",
+        {
+            "checked_at": checked_at,
+            "status": status,
+            "source": NEWS_URL,
+            "articles": inspected,
+            "diagnostics": {
+                **diagnostics,
+                "articles_discovered": len(
+                    discovered
+                ),
+                "articles_inspected": sum(
+                    a.get("inspection_status")
+                    == "ok"
+                    for a in inspected
+                ),
+                "candidates_found": len(
+                    candidates
+                )
+            },
+            "notice": (
+                "Les noms détectés ne sont pas "
+                "automatiquement considérés comme "
+                "de nouvelles espèces officielles."
+            )
+        }
+    )
+
+    save_json(
+        DATA / "pokemon-a-verifier.json",
+        {
+            "checked_at": checked_at,
+            "candidate_count": len(
+                candidates
+            ),
+            "candidates": candidates,
+            "notice": (
+                "Tous les candidats nécessitent "
+                "une validation humaine."
+            )
+        }
+    )
+
+    save_json(
         DATA / "official-news-review.json",
         {
             "checked_at": checked_at,
             "status": status,
-            "review_required": True,
-            "articles_found": len(articles),
+            "review_required": bool(
+                candidates
+            ),
+            "articles_found": len(
+                discovered
+            ),
+            "candidate_count": len(
+                candidates
+            ),
             "new_species_confirmed": 0,
-            "source": NEWS_URL,
-            "diagnostics": result["diagnostics"]
+            "source": NEWS_URL
         }
     )
 
     log(
-        f"Statut des actualités : {status}"
+        f"Articles trouvés : {len(discovered)}"
     )
 
     log(
-        f"Articles conservés : {len(articles)}"
+        f"Candidats à vérifier : {len(candidates)}"
     )
-
-    return result
 
 
 def main():
@@ -969,13 +972,13 @@ def main():
     )
 
     log("================================")
-    log("POKEDEX V5.0")
-    log("ACTUALISATION AUTOMATIQUE")
+    log("POKEDEX V5.1")
+    log("SURVEILLANCE OFFICIELLE")
     log("================================")
 
     catalogue = update_pokeapi()
 
-    news = update_official_news(
+    update_news(
         catalogue["known_names"]
     )
 
@@ -983,14 +986,6 @@ def main():
     log(
         "Espèces PokéAPI : "
         + str(catalogue["max_id"])
-    )
-    log(
-        "Articles officiels : "
-        + str(len(news["articles"]))
-    )
-    log(
-        "Statut : "
-        + news["status"]
     )
     log("ACTUALISATION TERMINÉE")
     log("================================")
