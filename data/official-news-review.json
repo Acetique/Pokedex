@@ -1,8 +1,9 @@
 {
-  "checked_at": "2026-10-13T03:24:42.939101+00:00",
+  "checked_at": "2026-10-13T03:30:07.163471+00:00",
   "status": "ok",
   "review_required": false,
-  "articles_found": 12,
+  "articles_found": 80,
+  "new_articles": 2103,
   "candidate_count": 0,
   "new_species_confirmed": 0,
   "source": "https://www.pokemon.com/us/pokemon-news"

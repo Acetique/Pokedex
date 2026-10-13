@@ -1,163 +1,779 @@
 {
-  "checked_at": "2026-10-13T03:24:42.939101+00:00",
+  "checked_at": "2026-10-13T03:30:07.163471+00:00",
   "status": "ok",
   "source": "https://www.pokemon.com/us/pokemon-news",
   "articles": [
     {
       "title": "Get Your Look Ready with Pokémon Center for Pokémon Night Out",
       "url": "https://www.pokemon.com/us/news/get-your-look-ready-with-pokemon-center-for-pokemon-night-out",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
-      "known_pokemon_mentions": [],
+      "known_pokemon_mentions": [
+        "eevee",
+        "gengar",
+        "groudon",
+        "kyogre",
+        "mewtwo",
+        "moltres",
+        "snivy",
+        "toxtricity"
+      ],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 3843
     },
     {
       "title": "Pokémon Pokopia Version 2.0.0 Adds New Quality of Life Improvements",
       "url": "https://www.pokemon.com/us/news/pokemon-pokopia-version-2-0-0-adds-new-quality-of-life-improvements",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "Pokémon Red & Pokémon Blue : Game Boy Jukebox Back in Stock at Pokémon Center",
       "url": "https://www.pokemon.com/us/news/pokemon-red-pokemon-blue-game-boy-jukebox-back-in-stock-at-pokemon-center",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "Own Pokémon Horizons: Season 3 Part 2 on Amazon, Apple TV, and YouTube Movies & TV",
       "url": "https://www.pokemon.com/us/news/own-pokemon-horizons-season-3-part-2-on-amazon-apple-tv-and-youtube-movies-tv",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "Pokémon FireRed Version and Pokémon LeafGreen Version Now Link with Pokémon HOME",
       "url": "https://www.pokemon.com/us/news/pokemon-firered-version-and-pokemon-leafgreen-version-now-link-with-pokemon-home",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "Zorua Can’t Hide During Pokémon GO’s October 2026 Community Day",
       "url": "https://www.pokemon.com/us/news/zorua-cant-hide-during-pokemon-gos-october-2026-community-day",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [
         "zorua"
       ],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "Compete in the 2027 Global Challenge II Online Competition",
       "url": "https://www.pokemon.com/us/news/compete-in-the-2027-global-challenge-ii-online-competition",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "The Pokémon Fossil Museum Is Coming to the Denver Museum of Nature & Science",
       "url": "https://www.pokemon.com/us/news/the-pokemon-fossil-museum-is-coming-to-the-denver-museum-of-nature-science",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "Celebrate Halloween with Spectacularly Spooky Pokémon Center Bundles",
       "url": "https://www.pokemon.com/us/news/celebrate-halloween-with-spectacularly-spooky-pokemon-center-bundles",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "Pokémon Horizons: Season 4—Wonders Ahead Coming to Netflix",
       "url": "https://www.pokemon.com/us/news/pokemon-horizons-season-4-wonders-ahead-coming-to-netflix",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "Pokémon and the European Space Agency Celebrate World Space Week 2026",
       "url": "https://www.pokemon.com/us/news/pokemon-and-the-european-space-agency-celebrate-world-space-week-2026",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
     },
     {
       "title": "Join the Pokémon Night Out Livestream to Party from Home",
       "url": "https://www.pokemon.com/us/news/join-the-pokemon-night-out-livestream-to-party-from-home",
-      "discovery_method": "previous_scan",
       "published_at": null,
+      "discovery_method": "html_link",
       "announcement_evidence": [],
       "known_pokemon_mentions": [],
       "name_candidates_for_review": [],
       "verified_new_species": false,
-      "inspection_status": "ok"
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Root Root Root For Pokemon Baseball",
+      "url": "https://www.pokemon.com/us/news/root-root-root-for-pokemon-baseball",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Pick Up Out Of This World Products From The Pokemon Center Esa Collaboration",
+      "url": "https://www.pokemon.com/us/news/pick-up-out-of-this-world-products-from-the-pokemon-center-esa-collaboration",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Check Out Every Pokemon Tcg Product Release In October 2026",
+      "url": "https://www.pokemon.com/us/news/check-out-every-pokemon-tcg-product-release-in-october-2026",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Pokemon Tcg Pocket Deluxe Pack Mega Is Now Available",
+      "url": "https://www.pokemon.com/us/news/pokemon-tcg-pocket-deluxe-pack-mega-is-now-available",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Shiny Magikarp And Shiny Gyarados Pokemon Center Bear Walker Skateboards Now Available",
+      "url": "https://www.pokemon.com/us/news/shiny-magikarp-and-shiny-gyarados-pokemon-center-bear-walker-skateboards-now-available",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [
+        "gyarados",
+        "magikarp"
+      ],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Gather Pumpkin Candy For Pumpkaboo In Pokemon Pokopia",
+      "url": "https://www.pokemon.com/us/news/gather-pumpkin-candy-for-pumpkaboo-in-pokemon-pokopia",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [
+        "pumpkaboo"
+      ],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Take On The 2027 Global Challenge I",
+      "url": "https://www.pokemon.com/us/news/take-on-the-2027-global-challenge-i",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Pokemon Legends Z A Nintendo Switch 2 Edition Mega Dimension Bundle Coming Soon",
+      "url": "https://www.pokemon.com/us/news/pokemon-legends-z-a-nintendo-switch-2-edition-mega-dimension-bundle-coming-soon",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "New Mega Evolution Pokemon Plush Are Now Available At Pokemon Center",
+      "url": "https://www.pokemon.com/us/news/new-mega-evolution-pokemon-plush-are-now-available-at-pokemon-center",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Pokemon Pokopia Tracks To Study And Relax To",
+      "url": "https://www.pokemon.com/us/news/pokemon-pokopia-tracks-to-study-and-relax-to",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Pokemon Tcg Pocket Deluxe Pack Mega Coming Soon",
+      "url": "https://www.pokemon.com/us/news/pokemon-tcg-pocket-deluxe-pack-mega-coming-soon",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Play At A Pokemon Tcg Mega Evolution Delta Reign Prerelease Event",
+      "url": "https://www.pokemon.com/us/news/play-at-a-pokemon-tcg-mega-evolution-delta-reign-prerelease-event",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Announcing Pokemon Unite Aeos Crown 2027",
+      "url": "https://www.pokemon.com/us/news/announcing-pokemon-unite-aeos-crown-2027",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "announcement_evidence": [],
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [],
+      "verified_new_species": false,
+      "inspection_status": "ok",
+      "extracted_text_length": 400
+    },
+    {
+      "title": "Come Party At The Pokemon Center Night Out Experience",
+      "url": "https://www.pokemon.com/us/news/come-party-at-the-pokemon-center-night-out-experience",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Horizons Season 3 Rising Hope Part 4 Now On Netflix",
+      "url": "https://www.pokemon.com/us/news/pokemon-horizons-season-3-rising-hope-part-4-now-on-netflix",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Join The Pokemon Night Out Party",
+      "url": "https://www.pokemon.com/us/news/join-the-pokemon-night-out-party",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Sean Wotherspoon Plush Collab Now Available At Pokemon Center",
+      "url": "https://www.pokemon.com/us/news/sean-wotherspoon-plush-collab-now-available-at-pokemon-center",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Partners With The European Space Agency For World Space Week 2026",
+      "url": "https://www.pokemon.com/us/news/pokemon-partners-with-the-european-space-agency-for-world-space-week-2026",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Check Out New Pokemon League Prizes Coming This October",
+      "url": "https://www.pokemon.com/us/news/check-out-new-pokemon-league-prizes-coming-this-october",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "The Pokemon Tcg 30Th Celebration Expansion Is Available Now",
+      "url": "https://www.pokemon.com/us/news/the-pokemon-tcg-30th-celebration-expansion-is-available-now",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Research Mewtwos Mysterious Sleep Styles In Pokemon Sleep",
+      "url": "https://www.pokemon.com/us/news/research-mewtwos-mysterious-sleep-styles-in-pokemon-sleep",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Celebrate Pokeween With Play Pokemon Events",
+      "url": "https://www.pokemon.com/us/news/celebrate-pokeween-with-play-pokemon-events",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Tcg 30Th Celebration Is Now Available In Pokemon Tcg Live",
+      "url": "https://www.pokemon.com/us/news/pokemon-tcg-30th-celebration-is-now-available-in-pokemon-tcg-live",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Get Ready To Register For The 2027 Latin America International Championships",
+      "url": "https://www.pokemon.com/us/news/get-ready-to-register-for-the-2027-latin-america-international-championships",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Get A Mewtwo Pokemon Tcg Promo Card At Participating Retailers",
+      "url": "https://www.pokemon.com/us/news/get-a-mewtwo-pokemon-tcg-promo-card-at-participating-retailers",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Pokopia Expansion Pass Dlc Part 2 Trailer",
+      "url": "https://www.pokemon.com/us/news/pokemon-pokopia-expansion-pass-dlc-part-2-trailer",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Take A Hike With Pokemon Gos New Season Twilight Trails",
+      "url": "https://www.pokemon.com/us/news/take-a-hike-with-pokemon-gos-new-season-twilight-trails",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "New Pokemon Sleep Tracks Are Now Available On Spotify",
+      "url": "https://www.pokemon.com/us/news/new-pokemon-sleep-tracks-are-now-available-on-spotify",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "See A Day And Nights Worth Of Cards From Pokemon Tcg 30Th Celebration",
+      "url": "https://www.pokemon.com/us/news/see-a-day-and-nights-worth-of-cards-from-pokemon-tcg-30th-celebration",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Enjoy Sweet And Spooky Surprises With Pokemon Center Halloween Plush",
+      "url": "https://www.pokemon.com/us/news/enjoy-sweet-and-spooky-surprises-with-pokemon-center-halloween-plush",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Browse Photos From Pokemonxp And The 2026 Pokemon World Championships",
+      "url": "https://www.pokemon.com/us/news/browse-photos-from-pokemonxp-and-the-2026-pokemon-world-championships",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Preview The Excitement Of Pokemon Night Out",
+      "url": "https://www.pokemon.com/us/news/preview-the-excitement-of-pokemon-night-out",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Quick Attack Top Moments From The 2026 Pokemon World Championships",
+      "url": "https://www.pokemon.com/us/news/quick-attack-top-moments-from-the-2026-pokemon-world-championships",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Champions Junior Is Coming To Nintendo Eshop In Germany And Brazil",
+      "url": "https://www.pokemon.com/us/news/pokemon-champions-junior-is-coming-to-nintendo-eshop-in-germany-and-brazil",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "School Is In Session In Pokemon Tcg Lives Study Season Event",
+      "url": "https://www.pokemon.com/us/news/school-is-in-session-in-pokemon-tcg-lives-study-season-event",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Enjoy A Pokemonxp And 2026 Worlds Pokemon Center Shopping Experience At Home",
+      "url": "https://www.pokemon.com/us/news/enjoy-a-pokemonxp-and-2026-worlds-pokemon-center-shopping-experience-at-home",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "New Feature Length Animated Film Pokemon Wild Card Coming Soon",
+      "url": "https://www.pokemon.com/us/news/new-feature-length-animated-film-pokemon-wild-card-coming-soon",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Get Ready For Regulation Set M C In Pokemon Champions",
+      "url": "https://www.pokemon.com/us/news/get-ready-for-regulation-set-m-c-in-pokemon-champions",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemonxp And The 2026 Pokemon World Championships Closing Ceremonies Recap",
+      "url": "https://www.pokemon.com/us/news/pokemonxp-and-the-2026-pokemon-world-championships-closing-ceremonies-recap",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Go Fest 2026 Mega Finale Offers Mega Raids And Super Mega Raids",
+      "url": "https://www.pokemon.com/us/news/pokemon-go-fest-2026-mega-finale-offers-mega-raids-and-super-mega-raids",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "2026 Pokemon World Championships Event Results",
+      "url": "https://www.pokemon.com/us/news/2026-pokemon-world-championships-event-results",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Check Out Every Pokemon Tcg Product Release In September 2026",
+      "url": "https://www.pokemon.com/us/news/check-out-every-pokemon-tcg-product-release-in-september-2026",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Play Pokemon Rules And Resources Updated For Q3 2026",
+      "url": "https://www.pokemon.com/us/news/play-pokemon-rules-and-resources-updated-for-q3-2026",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Tales The Misadventures Of Sirfetchd Pichu Coming To Disney In 2027",
+      "url": "https://www.pokemon.com/us/news/pokemon-tales-the-misadventures-of-sirfetchd-pichu-coming-to-disney-in-2027",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Check Out The New Pokemon Tcg Pocket Cards Announced At Pokemonxp",
+      "url": "https://www.pokemon.com/us/news/check-out-the-new-pokemon-tcg-pocket-cards-announced-at-pokemonxp",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Tcg Pocket Team Rockets Ambition Expansion Is Now Available",
+      "url": "https://www.pokemon.com/us/news/pokemon-tcg-pocket-team-rockets-ambition-expansion-is-now-available",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Celebrate Worlds And Pokemonxp With Champion Level Bundles And A Pikachu Coin",
+      "url": "https://www.pokemon.com/us/news/celebrate-worlds-and-pokemonxp-with-champion-level-bundles-and-a-pikachu-coin",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Pokopias Pokemonxp Worlds Cloud Island Is Live",
+      "url": "https://www.pokemon.com/us/news/pokemon-pokopias-pokemonxp-worlds-cloud-island-is-live",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Catch All The Pokemonxp And 2026 Pokemon World Championships Action",
+      "url": "https://www.pokemon.com/us/news/catch-all-the-pokemonxp-and-2026-pokemon-world-championships-action",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Preorder Pokemon Polaroid Special Edition Range Cameras Now",
+      "url": "https://www.pokemon.com/us/news/preorder-pokemon-polaroid-special-edition-range-cameras-now",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "The Pokemon Deluxe Character Guide From Pikachu Press Is Available Now",
+      "url": "https://www.pokemon.com/us/news/the-pokemon-deluxe-character-guide-from-pikachu-press-is-available-now",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "See New Pokemonxp And 2026 Pokemon World Championships Pokemon Center Merch",
+      "url": "https://www.pokemon.com/us/news/see-new-pokemonxp-and-2026-pokemon-world-championships-pokemon-center-merch",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Tune In To Worlds And Pokemonxp For Top Tier Digital Rewards",
+      "url": "https://www.pokemon.com/us/news/tune-in-to-worlds-and-pokemonxp-for-top-tier-digital-rewards",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "See Legendary Pokemon And More From Pokemon Tcg 30Th Celebration",
+      "url": "https://www.pokemon.com/us/news/see-legendary-pokemon-and-more-from-pokemon-tcg-30th-celebration",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Get Help For Playing Pokemon Pokopia Expansion Pass Part 1 Bubbly Basin Paid Dlc",
+      "url": "https://www.pokemon.com/us/news/get-help-for-playing-pokemon-pokopia-expansion-pass-part-1-bubbly-basin-paid-dlc",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "The Pokemon Tcg Mega Evolution Delta Reign Expansion Arrives November 6 2026",
+      "url": "https://www.pokemon.com/us/news/the-pokemon-tcg-mega-evolution-delta-reign-expansion-arrives-november-6-2026",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Tcg Pocket Team Rockets Ambition Expansion Is Coming Soon",
+      "url": "https://www.pokemon.com/us/news/pokemon-tcg-pocket-team-rockets-ambition-expansion-is-coming-soon",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Gos 2026 Pokemon World Championships Event",
+      "url": "https://www.pokemon.com/us/news/pokemon-gos-2026-pokemon-world-championships-event",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Horizons Season 3 Rising Hope Part 4 Comes To Netflix September 18",
+      "url": "https://www.pokemon.com/us/news/pokemon-horizons-season-3-rising-hope-part-4-comes-to-netflix-september-18",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Get A Sneak Peek At Lugia And Ho Oh From Pokemon Tcg 30Th Celebration",
+      "url": "https://www.pokemon.com/us/news/get-a-sneak-peek-at-lugia-and-ho-oh-from-pokemon-tcg-30th-celebration",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Murkrow Makes Memories In A New Poketoon Short On Youtube",
+      "url": "https://www.pokemon.com/us/news/murkrow-makes-memories-in-a-new-poketoon-short-on-youtube",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "New Prizes Are Coming To Pokemon League Cups At Play Pokemon Stores",
+      "url": "https://www.pokemon.com/us/news/new-prizes-are-coming-to-pokemon-league-cups-at-play-pokemon-stores",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Doughnuts Arrive At Krispy Kreme On August 18 2026",
+      "url": "https://www.pokemon.com/us/news/pokemon-doughnuts-arrive-at-krispy-kreme-on-august-18-2026",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokemon Polaroid Special Edition Range Cameras Are Coming Soon",
+      "url": "https://www.pokemon.com/us/news/pokemon-polaroid-special-edition-range-cameras-are-coming-soon",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Make Friends And Evolve Your Skills With Local Pokemon Vgc Events In Czechia",
+      "url": "https://www.pokemon.com/us/news/make-friends-and-evolve-your-skills-with-local-pokemon-vgc-events-in-czechia",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Errata For Diancie Scarlet Violet Stellar Crown In The Pokemon Tcg",
+      "url": "https://www.pokemon.com/us/news/errata-for-diancie-scarlet-violet-stellar-crown-in-the-pokemon-tcg",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Look At Electrifying Pikachu Cards From Pokemon Tcg 30Th Celebration",
+      "url": "https://www.pokemon.com/us/news/look-at-electrifying-pikachu-cards-from-pokemon-tcg-30th-celebration",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
+    },
+    {
+      "title": "Starmie Stars In Pokemon Go Ultra Unlock Starmie Super Mega Raid Day",
+      "url": "https://www.pokemon.com/us/news/starmie-stars-in-pokemon-go-ultra-unlock-starmie-super-mega-raid-day",
+      "published_at": null,
+      "discovery_method": "sitemap",
+      "inspection_status": "not_checked",
+      "verified_new_species": false
     }
   ],
   "diagnostics": {
-    "html_links": 0,
-    "sitemap_links": 0,
-    "errors": [
-      {
-        "source": "https://www.pokemon.com/us/news/sitemap.xml",
-        "error": "not well-formed (invalid token): line 1, column 423"
-      },
-      {
-        "source": "https://www.pokemon.com/us/pokemon-news/sitemap.xml",
-        "error": "not well-formed (invalid token): line 1, column 423"
-      },
-      {
-        "source": "https://www.pokemon.com/sitemap.xml",
-        "error": "not well-formed (invalid token): line 1, column 423"
-      }
-    ],
-    "articles_discovered": 12,
-    "articles_inspected": 12,
-    "candidates_found": 0
+    "html_links": 14,
+    "sitemap_links": 2115,
+    "new_articles": 2103,
+    "archived_articles": 0,
+    "articles_total": 80,
+    "articles_inspected": 25,
+    "candidates_found": 0,
+    "sitemap": {
+      "sitemaps_checked": 2,
+      "sitemap_articles_found": 2115,
+      "errors": []
+    },
+    "errors": []
   },
-  "notice": "Les noms détectés ne sont pas automatiquement considérés comme de nouvelles espèces officielles."
+  "notice": "Les candidats nécessitent une validation humaine."
 }
