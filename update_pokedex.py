@@ -3,16 +3,27 @@
 # -*- coding: utf-8 -*-
 
 """
-POKEDEX V5.2
-Actualisation automatique et surveillance officielle.
+POKEDEX V5.3 — ACETIQUE
+Actualisation automatique + surveillance officielle.
 
-Compatible :
-- Python 3.12
-- GitHub Actions
-- GitHub Pages
-- PokéAPI
+Fonctions :
+- Actualiser les espèces de PokéAPI
+- Actualiser les générations du Pokédex
+- Préserver les entrées provisoires existantes
+- Collecter les actualités de pokemon.com
+- Analyser les sitemaps officiels
+- Récupérer les dates de publication
+- Prioriser les annonces de nouvelles espèces
+- Éviter les analyses répétées inutiles
+- Détecter les contenus HTML incomplets
+- Comparer les noms avec PokéAPI
+- Conserver un historique permanent
+- Générer les fichiers JSON de surveillance
 
-Aucune dépendance externe.
+Aucune nouvelle espèce n'est ajoutée automatiquement
+à partir d'une simple annonce ou d'un nom candidat.
+
+Python 3.12 — bibliothèque standard uniquement.
 """
 
 import datetime as dt
@@ -22,7 +33,6 @@ import json
 from pathlib import Path
 import re
 import time
-import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -31,6 +41,8 @@ import xml.etree.ElementTree as ET
 # ============================================================
 # CONFIGURATION
 # ============================================================
+
+VERSION = "5.3"
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -42,83 +54,109 @@ NEWS_URL = OFFICIAL_SITE + "/us/pokemon-news"
 
 HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (compatible; "
-        "CommunityPokedex/5.2)"
+        "Mozilla/5.0 "
+        "(compatible; AcetiquePokedex/5.3)"
     ),
     "Accept": (
         "text/html,application/json,"
         "application/xml,text/xml;q=0.9,*/*;q=0.5"
     ),
+    "Accept-Language": "en-US,en;q=0.9",
 }
 
-MAX_ARTICLES = 80
-MAX_ARTICLE_FETCHES = 25
-REQUEST_DELAY = 0.4
-MAX_SITEMAP_URLS = 5000
+MAX_VISIBLE_ARTICLES = 100
+MAX_INSPECTIONS_PER_RUN = 35
+MAX_HISTORY_ENTRIES = 10000
+MAX_SITEMAP_URLS = 6000
+
+REQUEST_DELAY = 0.3
+REINSPECT_AFTER_DAYS = 14
+MIN_ARTICLE_TEXT_LENGTH = 120
 
 NEWS_PREFIXES = (
     "/us/news/",
     "/us/pokemon-news/",
-    "/fr/actualites/",
 )
 
-ANNOUNCEMENT_PATTERNS = [
+SITEMAPS = [
+    OFFICIAL_SITE + "/us/news/sitemap.xml",
+    OFFICIAL_SITE + "/sitemap.xml",
+]
+
+# Expressions annonçant potentiellement
+# une nouvelle espèce.
+STRONG_PATTERNS = [
     r"\bnewly discovered pok[eé]mon\b",
-    r"\bnew pok[eé]mon\b",
     r"\bnew species of pok[eé]mon\b",
+    r"\bnew pok[eé]mon (?:revealed|unveiled|discovered)\b",
     r"\bmeet (?:the )?new pok[eé]mon\b",
     r"\bintroducing (?:a |the )?new pok[eé]mon\b",
     r"\bnever.before.seen pok[eé]mon\b",
-    r"\bpok[eé]mon (?:has|have) been revealed\b",
-    r"\bnouveaux? pok[eé]mon\b",
-    r"\bnouvelles? esp[eè]ces? de pok[eé]mon\b",
-    r"\bpok[eé]mon in[eé]dits?\b",
+    r"\bnouvelle esp[eè]ce de pok[eé]mon\b",
+    r"\bpok[eé]mon in[eé]dit\b",
 ]
 
-MANUAL_POKEMON = {
-    "browt",
-    "pombon",
-    "gecqua",
-    "broussatif",
-    "caloulou",
-    "ogéko",
-}
+# Indices plus larges : utiles pour sélectionner
+# les articles, mais insuffisants pour
+# confirmer une nouvelle espèce.
+WEAK_PATTERNS = [
+    r"\bnew pok[eé]mon\b",
+    r"\bnew generation\b",
+    r"\bnew starters?\b",
+    r"\bstarter pok[eé]mon\b",
+    r"\bnew region\b",
+    r"\bpok[eé]mon presents\b",
+    r"\bpok[eé]mon revealed\b",
+    r"\bnew forms?\b",
+    r"\bmega evolution\b",
+    r"\bnouveaux pok[eé]mon\b",
+    r"\bnouvelle g[eé]n[eé]ration\b",
+]
 
 EXCLUDED_NAMES = {
-    "Pokemon", "Pokémon", "New", "Meet",
-    "Introducing", "Discover", "Discovered",
-    "Official", "News", "Update", "Updates",
-    "Game", "Games", "Nintendo", "Switch",
-    "Center", "Store", "Home", "Community",
-    "Event", "Events", "Season", "Series",
-    "Movie", "Movies", "Netflix", "Amazon",
-    "Apple", "Youtube", "YouTube", "Trading",
-    "Card", "Cards", "TCG", "Scarlet",
-    "Violet", "Legends", "Pokopia",
-    "Champions", "Version", "Online",
-    "Competition", "October", "November",
-    "December", "January", "February",
-    "March", "April", "May", "June", "July",
-    "August", "September", "Today",
-    "Tomorrow", "Learn", "More", "Details",
-    "Features", "Available", "Coming",
-    "Quality", "Life", "Improvements",
-    "Global", "Challenge", "Museum",
-    "World", "Space", "Agency",
-    "Pokedex", "Pokédex", "The", "This",
-    "These", "That", "With", "From",
-    "Their", "Your", "Ready", "Look",
-    "Celebrate", "During", "Into",
-    "First", "Next", "Fans", "Players",
-    "Adventure", "Region", "Regions",
-    "Forms", "Form", "Mega", "Evolution",
-    "Evolutions", "Battle", "Battles",
-    "Type", "Types",
+    "pokemon", "pokémon", "new", "meet",
+    "introducing", "discover", "discovered",
+    "official", "news", "update", "updates",
+    "game", "games", "nintendo", "switch",
+    "center", "store", "home", "community",
+    "event", "events", "season", "series",
+    "movie", "movies", "netflix", "amazon",
+    "apple", "youtube", "trading", "card",
+    "cards", "tcg", "scarlet", "violet",
+    "legends", "pokopia", "champions",
+    "version", "online", "competition",
+    "october", "november", "december",
+    "january", "february", "march", "april",
+    "may", "june", "july", "august",
+    "september", "today", "tomorrow",
+    "learn", "more", "details", "features",
+    "available", "coming", "quality",
+    "life", "improvements", "global",
+    "challenge", "museum", "world",
+    "space", "agency", "pokedex",
+    "pokédex", "the", "this", "these",
+    "that", "with", "from", "their",
+    "your", "ready", "look", "celebrate",
+    "during", "into", "first", "next",
+    "fans", "players", "adventure",
+    "region", "regions", "forms", "form",
+    "mega", "evolution", "evolutions",
+    "battle", "battles", "type", "types",
+    "generation", "starter", "starters",
+    "revealed", "unveiled", "species",
+    "never", "before", "seen", "and",
+    "for", "are", "has", "have", "will",
+    "can", "all", "you", "get",
+}
+
+MANUAL_POKEMON = {
+    "browt", "pombon", "gecqua",
+    "broussatif", "caloulou", "ogéko",
 }
 
 
 # ============================================================
-# OUTILS GÉNÉRAUX
+# UTILITAIRES
 # ============================================================
 
 def now():
@@ -129,19 +167,19 @@ def now():
 
 def log(message):
     print(
-        "[POKEDEX V5.2] " + str(message),
+        f"[POKEDEX V{VERSION}] {message}",
         flush=True
     )
 
 
-def save_json(path, data):
+def save_json(path, value):
     path.parent.mkdir(
         parents=True,
         exist_ok=True
     )
 
     content = json.dumps(
-        data,
+        value,
         ensure_ascii=False,
         indent=2
     ) + "\n"
@@ -169,6 +207,14 @@ def load_json(path, default=None):
         return default
 
 
+def clean_text(value):
+    return " ".join(
+        html.unescape(
+            str(value or "")
+        ).split()
+    )
+
+
 def fetch_response(url, timeout=25):
     request = urllib.request.Request(
         url,
@@ -181,10 +227,6 @@ def fetch_response(url, timeout=25):
     ) as response:
         raw = response.read(8_000_000)
 
-        content_type = response.headers.get(
-            "Content-Type", ""
-        )
-
         charset = (
             response.headers.get_content_charset()
             or "utf-8"
@@ -195,7 +237,9 @@ def fetch_response(url, timeout=25):
                 charset,
                 errors="replace"
             ),
-            "content_type": content_type,
+            "content_type": response.headers.get(
+                "Content-Type", ""
+            ),
             "status": response.status,
         }
 
@@ -206,14 +250,6 @@ def fetch(url):
 
 def fetch_json(url):
     return json.loads(fetch(url))
-
-
-def clean_text(value):
-    return " ".join(
-        html.unescape(
-            str(value or "")
-        ).split()
-    )
 
 
 def species_id(url):
@@ -232,13 +268,8 @@ def normalize_url(url, base=NEWS_URL):
     if not isinstance(url, str):
         return None
 
-    absolute = urllib.parse.urljoin(
-        base,
-        url
-    )
-
     parsed = urllib.parse.urlparse(
-        absolute
+        urllib.parse.urljoin(base, url)
     )
 
     if parsed.scheme != "https":
@@ -253,7 +284,7 @@ def normalize_url(url, base=NEWS_URL):
     return urllib.parse.urlunparse((
         "https",
         "www.pokemon.com",
-        parsed.path,
+        parsed.path.rstrip("/"),
         "",
         "",
         ""
@@ -265,17 +296,64 @@ def is_news_article(url):
         url
     ).path.lower()
 
-    if path.rstrip("/") in (
-        "/us/news",
-        "/us/pokemon-news",
-        "/fr/actualites"
-    ):
-        return False
-
     return any(
         path.startswith(prefix)
         for prefix in NEWS_PREFIXES
     )
+
+
+def parse_date(value):
+    if not value:
+        return None
+
+    try:
+        value = str(value).strip()
+
+        if value.endswith("Z"):
+            value = value[:-1] + "+00:00"
+
+        date = dt.datetime.fromisoformat(
+            value
+        )
+
+        if date.tzinfo is None:
+            date = date.replace(
+                tzinfo=dt.timezone.utc
+            )
+
+        return date.astimezone(
+            dt.timezone.utc
+        ).isoformat()
+
+    except (ValueError, TypeError):
+        return None
+
+
+def date_timestamp(value):
+    parsed = parse_date(value)
+
+    if not parsed:
+        return 0
+
+    return dt.datetime.fromisoformat(
+        parsed
+    ).timestamp()
+
+
+def days_since(value):
+    parsed = parse_date(value)
+
+    if not parsed:
+        return 999999
+
+    date = dt.datetime.fromisoformat(
+        parsed
+    )
+
+    return (
+        dt.datetime.now(dt.timezone.utc)
+        - date
+    ).total_seconds() / 86400
 
 
 # ============================================================
@@ -292,84 +370,97 @@ class PokemonHTMLParser(HTMLParser):
         self.links = []
         self.paragraphs = []
         self.jsonld = []
+        self.meta = {}
 
         self.current_href = None
-        self.current_link_text = []
+        self.link_text = []
 
-        self.capture_text_tag = None
-        self.current_text = []
+        self.text_tag = None
+        self.text_buffer = []
 
-        self.capture_jsonld = False
-        self.current_jsonld = []
+        self.jsonld_active = False
+        self.jsonld_buffer = []
 
-        self.ignored_tags = []
+        self.ignored = []
 
     def handle_starttag(self, tag, attrs):
-        attributes = dict(attrs)
+        attrs = dict(attrs)
+
+        if tag == "meta":
+            key = (
+                attrs.get("property")
+                or attrs.get("name")
+                or ""
+            ).lower()
+
+            if key:
+                self.meta[key] = attrs.get(
+                    "content", ""
+                )
 
         if tag == "script":
-            if "ld+json" in attributes.get(
+            if "ld+json" in attrs.get(
                 "type", ""
             ).lower():
-                self.capture_jsonld = True
-                self.current_jsonld = []
+                self.jsonld_active = True
+                self.jsonld_buffer = []
             else:
-                self.ignored_tags.append(tag)
+                self.ignored.append("script")
 
             return
 
         if tag in ("style", "noscript"):
-            self.ignored_tags.append(tag)
+            self.ignored.append(tag)
             return
 
-        if self.ignored_tags:
+        if self.ignored:
             return
 
         if tag == "a":
-            self.current_href = attributes.get(
+            self.current_href = attrs.get(
                 "href"
             )
-            self.current_link_text = []
+            self.link_text = []
 
         if tag in ("p", "h1", "h2", "h3"):
-            self.capture_text_tag = tag
-            self.current_text = []
+            self.text_tag = tag
+            self.text_buffer = []
 
     def handle_data(self, data):
-        if self.capture_jsonld:
-            self.current_jsonld.append(data)
+        if self.jsonld_active:
+            self.jsonld_buffer.append(data)
             return
 
-        if self.ignored_tags:
+        if self.ignored:
             return
 
         if self.current_href is not None:
-            self.current_link_text.append(data)
+            self.link_text.append(data)
 
-        if self.capture_text_tag is not None:
-            self.current_text.append(data)
+        if self.text_tag is not None:
+            self.text_buffer.append(data)
 
     def handle_endtag(self, tag):
-        if tag == "script" and self.capture_jsonld:
+        if tag == "script" and self.jsonld_active:
             raw = "".join(
-                self.current_jsonld
+                self.jsonld_buffer
             ).strip()
 
             if raw:
                 self.jsonld.append(raw)
 
-            self.capture_jsonld = False
-            self.current_jsonld = []
+            self.jsonld_active = False
+            self.jsonld_buffer = []
             return
 
         if (
-            self.ignored_tags
-            and tag == self.ignored_tags[-1]
+            self.ignored
+            and self.ignored[-1] == tag
         ):
-            self.ignored_tags.pop()
+            self.ignored.pop()
             return
 
-        if self.ignored_tags:
+        if self.ignored:
             return
 
         if tag == "a":
@@ -377,27 +468,23 @@ class PokemonHTMLParser(HTMLParser):
                 self.links.append({
                     "url": self.current_href,
                     "title": clean_text(
-                        " ".join(
-                            self.current_link_text
-                        )
+                        " ".join(self.link_text)
                     )
                 })
 
             self.current_href = None
-            self.current_link_text = []
+            self.link_text = []
 
-        if tag == self.capture_text_tag:
+        if tag == self.text_tag:
             text = clean_text(
-                " ".join(
-                    self.current_text
-                )
+                " ".join(self.text_buffer)
             )
 
             if len(text) >= 12:
                 self.paragraphs.append(text)
 
-            self.capture_text_tag = None
-            self.current_text = []
+            self.text_tag = None
+            self.text_buffer = []
 
 
 def parse_html(content):
@@ -407,10 +494,10 @@ def parse_html(content):
 
 
 # ============================================================
-# EXTRACTION DES ARTICLES
+# JSON-LD
 # ============================================================
 
-def jsonld_articles(value):
+def extract_jsonld_articles(raw_blocks):
     results = []
 
     def walk(node):
@@ -423,6 +510,7 @@ def jsonld_articles(value):
             return
 
         kinds = node.get("@type", [])
+
         if not isinstance(kinds, list):
             kinds = [kinds]
 
@@ -434,10 +522,6 @@ def jsonld_articles(value):
             )
             for kind in kinds
         ):
-            title = node.get(
-                "headline", ""
-            )
-
             url = node.get(
                 "url",
                 node.get("mainEntityOfPage")
@@ -446,28 +530,41 @@ def jsonld_articles(value):
             if isinstance(url, dict):
                 url = url.get("@id")
 
+            title = node.get(
+                "headline", ""
+            )
+
             if (
-                isinstance(title, str)
-                and isinstance(url, str)
+                isinstance(url, str)
+                and isinstance(title, str)
             ):
                 results.append({
-                    "title": title,
                     "url": url,
-                    "published_at": node.get(
-                        "datePublished"
+                    "title": title,
+                    "published_at": parse_date(
+                        node.get("datePublished")
                     ),
                     "discovery_method": "json_ld"
                 })
 
-        for child in node.values():
+        for value in node.values():
             if isinstance(
-                child, (dict, list)
+                value, (dict, list)
             ):
-                walk(child)
+                walk(value)
 
-    walk(value)
+    for raw in raw_blocks:
+        try:
+            walk(json.loads(raw))
+        except ValueError:
+            continue
+
     return results
 
+
+# ============================================================
+# COLLECTE HTML
+# ============================================================
 
 def discover_html_articles():
     response = fetch_response(
@@ -478,81 +575,58 @@ def discover_html_articles():
         response["text"]
     )
 
-    articles = []
+    found = []
 
-    for link in parser.links:
+    for item in parser.links:
         url = normalize_url(
-            link["url"]
+            item["url"]
         )
 
         if not url or not is_news_article(url):
             continue
 
         title = clean_text(
-            link["title"]
+            item["title"]
         )
 
         if len(title) < 8:
             title = (
-                url.rstrip("/")
-                .split("/")[-1]
+                url.rsplit("/", 1)[-1]
                 .replace("-", " ")
                 .title()
             )
 
-        articles.append({
-            "title": title[:220],
+        found.append({
             "url": url,
+            "title": title[:220],
             "published_at": None,
             "discovery_method": "html_link"
         })
 
-    for raw in parser.jsonld:
-        try:
-            structured = json.loads(raw)
-        except ValueError:
-            continue
+    for item in extract_jsonld_articles(
+        parser.jsonld
+    ):
+        url = normalize_url(
+            item["url"]
+        )
 
-        for article in jsonld_articles(
-            structured
-        ):
-            url = normalize_url(
-                article["url"]
-            )
+        if url and is_news_article(url):
+            item["url"] = url
+            found.append(item)
 
-            if not url or not is_news_article(url):
-                continue
-
-            articles.append({
-                **article,
-                "url": url
-            })
-
-    return articles
+    return found
 
 
 # ============================================================
-# SITEMAPS
+# COLLECTE SITEMAP
 # ============================================================
 
 def discover_sitemap_articles():
-    """
-    Recherche limitée aux sitemaps utiles.
-
-    Un sitemap n'est analysé que si la réponse
-    ressemble réellement à du XML.
-    """
-
-    sitemap_urls = [
-        OFFICIAL_SITE + "/us/news/sitemap.xml",
-        OFFICIAL_SITE + "/sitemap.xml",
-    ]
-
     found = []
     errors = []
     checked = 0
 
-    for sitemap in sitemap_urls:
+    for sitemap in SITEMAPS:
         checked += 1
 
         try:
@@ -568,12 +642,8 @@ def discover_sitemap_articles():
             stripped = content.lstrip()
 
             looks_xml = (
-                stripped.startswith(
-                    "<?xml"
-                )
-                or stripped.startswith(
-                    "<urlset"
-                )
+                stripped.startswith("<?xml")
+                or stripped.startswith("<urlset")
                 or stripped.startswith(
                     "<sitemapindex"
                 )
@@ -586,38 +656,42 @@ def discover_sitemap_articles():
                 errors.append({
                     "url": sitemap,
                     "error": (
-                        "Réponse non XML : "
+                        "Contenu non XML : "
                         + content_type
                     )
                 })
                 continue
 
-            try:
-                root = ET.fromstring(
-                    content
-                )
-            except ET.ParseError as exc:
-                errors.append({
-                    "url": sitemap,
-                    "error": (
-                        "XML invalide : "
-                        + str(exc)
-                    )
-                })
-                continue
+            root = ET.fromstring(
+                content
+            )
 
             count = 0
 
-            for element in root.iter():
+            for node in root.iter():
                 if (
-                    element.tag.split("}")[-1]
-                    != "loc"
+                    node.tag.split("}")[-1]
+                    != "url"
                 ):
                     continue
 
-                url = normalize_url(
-                    element.text or ""
-                )
+                url = None
+                published_at = None
+
+                for child in node:
+                    name = child.tag.split(
+                        "}"
+                    )[-1]
+
+                    if name == "loc":
+                        url = normalize_url(
+                            child.text or ""
+                        )
+
+                    elif name == "lastmod":
+                        published_at = parse_date(
+                            child.text
+                        )
 
                 if (
                     not url
@@ -626,16 +700,16 @@ def discover_sitemap_articles():
                     continue
 
                 title = (
-                    url.rstrip("/")
-                    .split("/")[-1]
+                    url.rsplit("/", 1)[-1]
                     .replace("-", " ")
                     .title()
                 )
 
                 found.append({
-                    "title": title,
                     "url": url,
+                    "title": title,
                     "published_at": None,
+                    "sitemap_lastmod": published_at,
                     "discovery_method": "sitemap"
                 })
 
@@ -650,30 +724,82 @@ def discover_sitemap_articles():
                 "error": str(exc)[:200]
             })
 
-        time.sleep(
-            REQUEST_DELAY
-        )
+        time.sleep(REQUEST_DELAY)
 
     return found, {
         "sitemaps_checked": checked,
-        "sitemap_articles_found": len(
-            found
-        ),
+        "sitemap_links": len(found),
         "errors": errors
     }
 
 
 # ============================================================
-# ANALYSE DES ANNONCES
+# CLASSEMENT DES ARTICLES
 # ============================================================
 
-def find_announcement_evidence(text):
+def article_score(article):
+    title = article.get(
+        "title", ""
+    )
+
+    score = 0
+
+    for pattern in STRONG_PATTERNS:
+        if re.search(
+            pattern,
+            title,
+            re.IGNORECASE
+        ):
+            score += 100
+
+    for pattern in WEAK_PATTERNS:
+        if re.search(
+            pattern,
+            title,
+            re.IGNORECASE
+        ):
+            score += 25
+
+    if re.search(
+        r"\b(gen(?:eration)?\s*10|"
+        r"new species|starter|"
+        r"revealed|unveiled)\b",
+        title,
+        re.IGNORECASE
+    ):
+        score += 30
+
+    if article.get(
+        "discovery_method"
+    ) == "html_link":
+        score += 15
+
+    if article.get("published_at"):
+        age = days_since(
+            article["published_at"]
+        )
+
+        if age <= 7:
+            score += 30
+        elif age <= 30:
+            score += 20
+        elif age <= 90:
+            score += 10
+
+    return score
+
+
+# ============================================================
+# ANALYSE DES ARTICLES
+# ============================================================
+
+def announcement_evidence(text):
     sentences = re.split(
         r"(?<=[.!?])\s+",
         text
     )
 
-    evidence = []
+    results = []
 
     for sentence in sentences:
         if any(
@@ -682,16 +808,16 @@ def find_announcement_evidence(text):
                 sentence,
                 re.IGNORECASE
             )
-            for pattern in ANNOUNCEMENT_PATTERNS
+            for pattern in STRONG_PATTERNS
         ):
-            evidence.append(
-                sentence[:500]
+            results.append(
+                clean_text(sentence)[:500]
             )
 
-    return evidence[:10]
+    return results[:10]
 
 
-def find_known_pokemon(text, known_names):
+def known_mentions(text, known_names):
     normalized = re.sub(
         r"[^a-z0-9-]",
         " ",
@@ -709,40 +835,88 @@ def find_known_pokemon(text, known_names):
     )[:40]
 
 
-def find_candidate_names(text, known_names):
-    """
-    Recherche indicative de noms propres.
-
-    Les candidats sont toujours soumis
-    à une vérification humaine.
-    """
-
+def candidate_names(text, known_names):
     matches = re.findall(
-        r"\b[A-Z][a-z]{3,}(?:[-'][A-Z]?[a-z]+)?\b",
+        r"\b[A-Z][a-z]{3,}"
+        r"(?:[-'][A-Z]?[a-z]+)?\b",
         text
     )
 
-    candidates = []
+    results = []
 
     for name in matches:
-        lower = name.lower()
+        lowered = name.lower()
 
-        if name in EXCLUDED_NAMES:
+        if lowered in EXCLUDED_NAMES:
             continue
 
-        if lower in known_names:
+        if lowered in known_names:
             continue
 
-        if lower in MANUAL_POKEMON:
+        if lowered in MANUAL_POKEMON:
             continue
 
         if len(name) > 22:
             continue
 
-        if name not in candidates:
-            candidates.append(name)
+        if name not in results:
+            results.append(name)
 
-    return candidates[:25]
+    return results[:25]
+
+
+def extract_publication_date(parser):
+    keys = (
+        "article:published_time",
+        "datepublished",
+        "date",
+        "pubdate",
+    )
+
+    for key in keys:
+        value = parser.meta.get(
+            key
+        )
+
+        parsed = parse_date(value)
+
+        if parsed:
+            return parsed
+
+    for raw in parser.jsonld:
+        try:
+            structured = json.loads(raw)
+        except ValueError:
+            continue
+
+        stack = [structured]
+
+        while stack:
+            item = stack.pop()
+
+            if isinstance(item, list):
+                stack.extend(item)
+                continue
+
+            if not isinstance(item, dict):
+                continue
+
+            parsed = parse_date(
+                item.get("datePublished")
+            )
+
+            if parsed:
+                return parsed
+
+            stack.extend(
+                value
+                for value in item.values()
+                if isinstance(
+                    value, (dict, list)
+                )
+            )
+
+    return None
 
 
 def inspect_article(article, known_names):
@@ -752,14 +926,15 @@ def inspect_article(article, known_names):
     result["known_pokemon_mentions"] = []
     result["name_candidates_for_review"] = []
     result["verified_new_species"] = False
+    result["inspected_at"] = now()
 
     try:
-        content = fetch(
+        response = fetch_response(
             article["url"]
         )
 
         parser = parse_html(
-            content
+            response["text"]
         )
 
         body = " ".join(
@@ -772,7 +947,37 @@ def inspect_article(article, known_names):
             + body
         )
 
-        evidence = find_announcement_evidence(
+        publication = extract_publication_date(
+            parser
+        )
+
+        if publication:
+            result[
+                "published_at"
+            ] = publication
+
+        result[
+            "extracted_text_length"
+        ] = len(body)
+
+        if len(body) < MIN_ARTICLE_TEXT_LENGTH:
+            result[
+                "inspection_status"
+            ] = "insufficient_content"
+            return result
+
+        # Une page avec un petit contenu
+        # identique à d'autres pages peut
+        # correspondre à une réponse générique.
+        result[
+            "content_fingerprint"
+        ] = __import__(
+            "hashlib"
+        ).sha256(
+            body.encode("utf-8")
+        ).hexdigest()[:16]
+
+        evidence = announcement_evidence(
             text
         )
 
@@ -782,7 +987,7 @@ def inspect_article(article, known_names):
 
         result[
             "known_pokemon_mentions"
-        ] = find_known_pokemon(
+        ] = known_mentions(
             text,
             known_names
         )
@@ -790,27 +995,29 @@ def inspect_article(article, known_names):
         if evidence:
             result[
                 "name_candidates_for_review"
-            ] = find_candidate_names(
+            ] = candidate_names(
                 " ".join(evidence),
                 known_names
             )
 
-        result["inspection_status"] = "ok"
-        result["extracted_text_length"] = len(
-            body
-        )
+        result[
+            "inspection_status"
+        ] = "ok"
 
     except Exception as exc:
-        result["inspection_status"] = "error"
-        result["inspection_error"] = str(
-            exc
-        )[:200]
+        result[
+            "inspection_status"
+        ] = "error"
+
+        result[
+            "inspection_error"
+        ] = str(exc)[:200]
 
     return result
 
 
 # ============================================================
-# ACTUALISATION POKEAPI
+# POKEAPI
 # ============================================================
 
 def update_pokeapi():
@@ -826,13 +1033,13 @@ def update_pokeapi():
     ]
 
     ids = [
-        value for value in ids
-        if value is not None
+        number for number in ids
+        if number is not None
     ]
 
     if not ids:
         raise RuntimeError(
-            "Aucune espèce PokéAPI"
+            "Aucune espèce récupérée"
         )
 
     max_id = max(ids)
@@ -888,14 +1095,14 @@ def update_pokeapi():
         encoding="utf-8"
     )
 
-    updated, max_count = re.subn(
+    updated, count_max = re.subn(
         r"MAX=\d+,PAGE=",
         f"MAX={max_id},PAGE=",
         original,
         count=1
     )
 
-    updated, ranges_count = re.subn(
+    updated, count_ranges = re.subn(
         r"const genRanges=\[\[.*?\]\];",
         "const genRanges="
         + json.dumps(
@@ -908,8 +1115,8 @@ def update_pokeapi():
     )
 
     if (
-        max_count != 1
-        or ranges_count != 1
+        count_max != 1
+        or count_ranges != 1
     ):
         raise RuntimeError(
             "Marqueurs index.html introuvables"
@@ -951,22 +1158,62 @@ def update_pokeapi():
 
 
 # ============================================================
-# ACTUALISATION DES ACTUALITÉS
+# HISTORIQUE ET ACTUALITÉS
 # ============================================================
 
 def update_news(known_names):
-    log(
-        "Recherche des actualités officielles"
+    log("Collecte des actualités officielles")
+
+    history_path = (
+        DATA / "historique-actualites.json"
     )
 
-    previous = load_json(
+    previous_history = load_json(
+        history_path,
+        {}
+    ) or {}
+
+    history = previous_history.get(
+        "articles", {}
+    )
+
+    if not isinstance(history, dict):
+        history = {}
+
+    previous_news = load_json(
         DATA / "nouveautes-pokemon.json",
         {}
     ) or {}
 
-    previous_articles = previous.get(
+    # Migration depuis la V5.2.
+    for old in previous_news.get(
         "articles", []
-    )
+    ):
+        if not isinstance(old, dict):
+            continue
+
+        url = normalize_url(
+            old.get("url", "")
+        )
+
+        if not url or not is_news_article(url):
+            continue
+
+        if url not in history:
+            history[url] = {
+                **old,
+                "url": url,
+                "first_seen": (
+                    previous_news.get(
+                        "checked_at"
+                    ) or now()
+                ),
+                "last_seen": (
+                    previous_news.get(
+                        "checked_at"
+                    ) or now()
+                ),
+            }
 
     errors = []
 
@@ -980,99 +1227,189 @@ def update_news(known_names):
             "error": str(exc)[:200]
         })
 
-    sitemap_articles, sitemap_diagnostics = (
+    sitemap_articles, sitemap_info = (
         discover_sitemap_articles()
     )
 
-    current_articles = {}
+    discovered = {}
 
+    # Les liens HTML ont priorité sur les
+    # titres générés à partir des URL.
     for article in (
-        html_articles + sitemap_articles
+        sitemap_articles + html_articles
     ):
         url = article["url"]
 
-        if (
-            url not in current_articles
-            or article["discovery_method"]
+        if url not in discovered:
+            discovered[url] = article
+        elif (
+            article["discovery_method"]
             == "html_link"
         ):
-            current_articles[url] = article
+            old = discovered[url]
 
-    previously_known_urls = {
-        item.get("url")
-        for item in previous_articles
-        if isinstance(item, dict)
-    }
+            discovered[url] = {
+                **old,
+                **article,
+                "published_at": (
+                    article.get("published_at")
+                    or old.get("published_at")
+                )
+            }
 
-    newly_discovered = [
-        article
-        for url, article in current_articles.items()
-        if url not in previously_known_urls
-    ]
+    new_urls = []
 
-    archive_articles = []
+    for url, article in discovered.items():
+        if url not in history:
+            new_urls.append(url)
 
-    for item in previous_articles:
-        if not isinstance(item, dict):
+            history[url] = {
+                **article,
+                "first_seen": now(),
+                "last_seen": now(),
+                "inspection_status": (
+                    "not_checked"
+                ),
+                "verified_new_species": False,
+            }
+
+        else:
+            old = history[url]
+
+            old["last_seen"] = now()
+
+            # Conserver les meilleurs titres.
+            if (
+                article.get(
+                    "discovery_method"
+                ) == "html_link"
+            ):
+                old["title"] = article[
+                    "title"
+                ]
+
+            if (
+                not old.get("published_at")
+                and article.get("published_at")
+            ):
+                old["published_at"] = (
+                    article["published_at"]
+                )
+
+            if article.get(
+                "sitemap_lastmod"
+            ):
+                old["sitemap_lastmod"] = (
+                    article["sitemap_lastmod"]
+                )
+
+    # Priorité :
+    # 1. Annonces pertinentes
+    # 2. Articles jamais inspectés
+    # 3. Articles récents
+    # 4. Autres articles
+    pending = []
+
+    for url, article in history.items():
+        if url not in discovered:
             continue
 
-        url = normalize_url(
-            item.get("url", "")
+        status = article.get(
+            "inspection_status",
+            "not_checked"
         )
 
-        if (
+        last_inspected = article.get(
+            "inspected_at"
+        )
+
+        needs_inspection = (
+            status in (
+                "not_checked",
+                "error",
+                "insufficient_content"
+            )
+            or days_since(
+                last_inspected
+            ) >= REINSPECT_AFTER_DAYS
+        )
+
+        if not needs_inspection:
+            continue
+
+        score = article_score(
+            article
+        )
+
+        if status == "not_checked":
+            score += 20
+
+        if url in new_urls:
+            score += 10
+
+        pending.append((
+            score,
+            date_timestamp(
+                article.get("published_at")
+            ),
             url
-            and is_news_article(url)
-            and url not in current_articles
-        ):
-            archive_articles.append({
-                "title": item.get(
-                    "title", ""
-                ),
-                "url": url,
-                "published_at": item.get(
-                    "published_at"
-                ),
-                "discovery_method": (
-                    "previous_scan"
-                )
-            })
+        ))
 
-    articles = (
-        list(current_articles.values())
-        + archive_articles
-    )[:MAX_ARTICLES]
+    pending.sort(
+        key=lambda item: (
+            item[0],
+            item[1]
+        ),
+        reverse=True
+    )
 
-    inspected = []
+    inspected_count = 0
 
-    for index, article in enumerate(
-        articles
-    ):
-        if index < MAX_ARTICLE_FETCHES:
-            inspected.append(
-                inspect_article(
-                    article,
-                    known_names
-                )
-            )
+    for _, _, url in pending[
+        :MAX_INSPECTIONS_PER_RUN
+    ]:
+        inspected = inspect_article(
+            history[url],
+            known_names
+        )
 
-            time.sleep(
-                REQUEST_DELAY
-            )
-        else:
-            item = dict(article)
+        history[url] = inspected
+        inspected_count += 1
 
-            item["inspection_status"] = (
-                "not_checked"
-            )
+        time.sleep(
+            REQUEST_DELAY
+        )
 
-            item["verified_new_species"] = False
+    # Détection des réponses génériques
+    # identiques sur plusieurs URL.
+    fingerprints = {}
 
-            inspected.append(item)
+    for url, article in history.items():
+        fingerprint = article.get(
+            "content_fingerprint"
+        )
+
+        if fingerprint:
+            fingerprints.setdefault(
+                fingerprint, []
+            ).append(url)
+
+    generic_count = 0
+
+    for urls in fingerprints.values():
+        if len(urls) < 3:
+            continue
+
+        for url in urls:
+            history[url][
+                "inspection_status"
+            ] = "suspected_generic_content"
+
+            generic_count += 1
 
     candidates = []
 
-    for article in inspected:
+    for article in history.values():
         evidence = article.get(
             "announcement_evidence", []
         )
@@ -1085,14 +1422,21 @@ def update_news(known_names):
         ):
             candidates.append({
                 "name": name,
-                "source_title": article["title"],
-                "source_url": article["url"],
+                "source_title": article.get(
+                    "title", ""
+                ),
+                "source_url": article.get(
+                    "url", ""
+                ),
+                "published_at": article.get(
+                    "published_at"
+                ),
                 "evidence": evidence[:3],
                 "status": "requires_manual_review",
                 "verified": False
             })
 
-    unique = {}
+    unique_candidates = {}
 
     for candidate in candidates:
         key = (
@@ -1100,20 +1444,50 @@ def update_news(known_names):
             candidate["source_url"]
         )
 
-        unique[key] = candidate
+        unique_candidates[key] = candidate
 
     candidates = list(
-        unique.values()
+        unique_candidates.values()
     )
 
-    if current_articles:
+    # Conserver les entrées récentes et
+    # les annonces importantes.
+    if len(history) > MAX_HISTORY_ENTRIES:
+        ordered = sorted(
+            history.items(),
+            key=lambda pair: (
+                article_score(pair[1]),
+                date_timestamp(
+                    pair[1].get("first_seen")
+                )
+            ),
+            reverse=True
+        )
+
+        history = dict(
+            ordered[:MAX_HISTORY_ENTRIES]
+        )
+
+    visible = sorted(
+        history.values(),
+        key=lambda article: (
+            article_score(article),
+            date_timestamp(
+                article.get("published_at")
+            ),
+            date_timestamp(
+                article.get("first_seen")
+            )
+        ),
+        reverse=True
+    )[:MAX_VISIBLE_ARTICLES]
+
+    if discovered:
         status = "ok"
-    elif archive_articles:
+    elif history:
         status = "degraded_archive_only"
-    elif errors:
-        status = "source_unavailable"
     else:
-        status = "no_articles_detected"
+        status = "source_unavailable"
 
     checked_at = now()
 
@@ -1124,39 +1498,51 @@ def update_news(known_names):
         "sitemap_links": len(
             sitemap_articles
         ),
-        "new_articles": len(
-            newly_discovered
+        "unique_discovered_urls": len(
+            discovered
         ),
-        "archived_articles": len(
-            archive_articles
+        "first_seen_urls": len(
+            new_urls
         ),
-        "articles_total": len(
-            inspected
+        "articles_inspected_this_run": (
+            inspected_count
         ),
-        "articles_inspected": sum(
-            item.get(
-                "inspection_status"
-            ) == "ok"
-            for item in inspected
+        "history_entries": len(
+            history
+        ),
+        "suspected_generic_content": (
+            generic_count
         ),
         "candidates_found": len(
             candidates
         ),
-        "sitemap": sitemap_diagnostics,
+        "sitemap": sitemap_info,
         "errors": errors
     }
 
     save_json(
+        history_path,
+        {
+            "version": VERSION,
+            "checked_at": checked_at,
+            "articles": history
+        }
+    )
+
+    save_json(
         DATA / "nouveautes-pokemon.json",
         {
+            "version": VERSION,
             "checked_at": checked_at,
             "status": status,
             "source": NEWS_URL,
-            "articles": inspected,
+            "articles": visible,
             "diagnostics": diagnostics,
             "notice": (
-                "Les candidats nécessitent "
-                "une validation humaine."
+                "Les nouvelles URL ne sont pas "
+                "nécessairement de nouvelles "
+                "publications. Les noms candidats "
+                "doivent être vérifiés."
             )
         }
     )
@@ -1164,14 +1550,15 @@ def update_news(known_names):
     save_json(
         DATA / "pokemon-a-verifier.json",
         {
+            "version": VERSION,
             "checked_at": checked_at,
             "candidate_count": len(
                 candidates
             ),
             "candidates": candidates,
             "notice": (
-                "Aucun candidat n'est ajouté "
-                "automatiquement au Pokédex."
+                "Aucune espèce n'est ajoutée "
+                "automatiquement sans validation."
             )
         }
     )
@@ -1179,16 +1566,17 @@ def update_news(known_names):
     save_json(
         DATA / "official-news-review.json",
         {
+            "version": VERSION,
             "checked_at": checked_at,
             "status": status,
             "review_required": bool(
                 candidates
             ),
-            "articles_found": len(
-                inspected
+            "first_seen_urls": len(
+                new_urls
             ),
-            "new_articles": len(
-                newly_discovered
+            "articles_inspected": (
+                inspected_count
             ),
             "candidate_count": len(
                 candidates
@@ -1199,32 +1587,42 @@ def update_news(known_names):
     )
 
     log(
-        "Nouveaux articles : "
-        + str(len(newly_discovered))
+        "Liens HTML : "
+        + str(len(html_articles))
     )
 
     log(
-        "Articles analysés : "
-        + str(
-            diagnostics[
-                "articles_inspected"
-            ]
-        )
+        "Liens sitemap : "
+        + str(len(sitemap_articles))
     )
 
     log(
-        "Candidats : "
+        "Nouvelles URL dans l'historique : "
+        + str(len(new_urls))
+    )
+
+    log(
+        "Articles inspectés : "
+        + str(inspected_count)
+    )
+
+    log(
+        "Contenus génériques suspects : "
+        + str(generic_count)
+    )
+
+    log(
+        "Candidats à vérifier : "
         + str(len(candidates))
     )
 
     log(
-        "Statut : "
-        + status
+        "Statut : " + status
     )
 
 
 # ============================================================
-# EXÉCUTION
+# PROGRAMME PRINCIPAL
 # ============================================================
 
 def main():
@@ -1234,8 +1632,8 @@ def main():
     )
 
     log("================================")
-    log("POKEDEX V5.2")
-    log("COLLECTEUR OFFICIEL")
+    log("POKEDEX V5.3 — ACETIQUE")
+    log("SURVEILLANCE DES NOUVEAUX POKÉMON")
     log("================================")
 
     catalogue = update_pokeapi()
