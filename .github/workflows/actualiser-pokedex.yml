@@ -29,24 +29,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Préparer le dossier data
-        run: mkdir -p data
-
-      - name: Actualiser les données Pokémon
+      - name: Actualiser les données
         run: python update_pokedex.py
 
-      - name: Vérifier les modifications
-        id: changes
-        shell: bash
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Publier les modifications
-        if: steps.changes.outputs.changed == 'true'
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -57,7 +43,6 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "Actualisation automatique du Pokédex"
             git push
+          else
+            echo "Aucun changement à publier."
           fi
-
-      - name: Résultat final
-        run: echo "Actualisation du Pokédex terminée."
