@@ -1,8 +1,7 @@
-[
-  {
-    "url": "https://www.pokemon.com/us/pokemon-news",
-    "page_title": "Latest News | Pokemon.com",
-    "checked_at": "2026-10-13T03:04:58.940709+00:00",
-    "status": "review_required"
-  }
-]
+{
+  "checked_at": "2026-10-13T03:15:26.636965+00:00",
+  "status": "no_articles_detected",
+  "review_required": true,
+  "articles_found": 0,
+  "source": "https://www.pokemon.com/us/pokemon-news"
+}

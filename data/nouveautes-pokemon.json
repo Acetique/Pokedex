@@ -1,8 +1,7 @@
-
 {
-  "checked_at": null,
-  "status": "pending_first_run",
+  "checked_at": "2026-10-13T03:15:26.636965+00:00",
+  "status": "no_articles_detected",
   "source": "https://www.pokemon.com/us/pokemon-news",
   "articles": [],
-  "notice": "Official news links require review before identifying new species."
+  "notice": "Official news links only; articles are not automatically classified as new Pokémon species."
 }
