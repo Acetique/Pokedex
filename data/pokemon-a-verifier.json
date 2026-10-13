@@ -1,6 +1,6 @@
 {
   "version": "5.9",
-  "checked_at": "2026-10-13T23:28:22.962850+00:00",
+  "checked_at": "2026-10-13T23:33:33.832639+00:00",
   "method": "official_title_patterns_only",
   "known_species_count": 1025,
   "articles_analyzed": 2114,
@@ -14,7 +14,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.953759+00:00",
+      "first_detected": "2026-10-13T23:33:33.828108+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -33,7 +33,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.957134+00:00",
+      "first_detected": "2026-10-13T23:33:33.829774+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -48,7 +48,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.951249+00:00",
+      "first_detected": "2026-10-13T23:33:33.826872+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -75,7 +75,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.962654+00:00",
+      "first_detected": "2026-10-13T23:33:33.832536+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -90,7 +90,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.961134+00:00",
+      "first_detected": "2026-10-13T23:33:33.831770+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -105,7 +105,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.954065+00:00",
+      "first_detected": "2026-10-13T23:33:33.828256+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -132,7 +132,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.959046+00:00",
+      "first_detected": "2026-10-13T23:33:33.830727+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -147,7 +147,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.954510+00:00",
+      "first_detected": "2026-10-13T23:33:33.828480+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -162,7 +162,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.951486+00:00",
+      "first_detected": "2026-10-13T23:33:33.826996+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -181,7 +181,7 @@
       "status": "a_verifier",
       "score": 85,
       "reason": "Nom après « nouveau Pokémon »",
-      "first_detected": "2026-10-13T23:28:22.954628+00:00",
+      "first_detected": "2026-10-13T23:33:33.828539+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -196,7 +196,7 @@
       "status": "a_verifier",
       "score": 75,
       "reason": "Nom après un verbe de présentation",
-      "first_detected": "2026-10-13T23:28:22.953994+00:00",
+      "first_detected": "2026-10-13T23:33:33.828222+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -211,7 +211,7 @@
       "status": "a_verifier",
       "score": 75,
       "reason": "Nom après un verbe de présentation",
-      "first_detected": "2026-10-13T23:28:22.958142+00:00",
+      "first_detected": "2026-10-13T23:33:33.830269+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -226,7 +226,7 @@
       "status": "a_verifier",
       "score": 75,
       "reason": "Nom après un verbe de présentation",
-      "first_detected": "2026-10-13T23:28:22.957892+00:00",
+      "first_detected": "2026-10-13T23:33:33.830145+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -241,7 +241,7 @@
       "status": "a_verifier",
       "score": 75,
       "reason": "Nom après un verbe de présentation",
-      "first_detected": "2026-10-13T23:28:22.956514+00:00",
+      "first_detected": "2026-10-13T23:33:33.829468+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -256,7 +256,7 @@
       "status": "a_verifier",
       "score": 75,
       "reason": "Nom après un verbe de présentation",
-      "first_detected": "2026-10-13T23:28:22.952242+00:00",
+      "first_detected": "2026-10-13T23:33:33.827374+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -271,7 +271,7 @@
       "status": "a_verifier",
       "score": 75,
       "reason": "Nom après un verbe de présentation",
-      "first_detected": "2026-10-13T23:28:22.956835+00:00",
+      "first_detected": "2026-10-13T23:33:33.829625+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
@@ -290,7 +290,7 @@
       "status": "a_verifier",
       "score": 75,
       "reason": "Nom après un verbe de présentation",
-      "first_detected": "2026-10-13T23:28:22.956794+00:00",
+      "first_detected": "2026-10-13T23:33:33.829606+00:00",
       "already_in_site_provisionally": false,
       "verified_by_pokeapi": false,
       "sources": [
