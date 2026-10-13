@@ -3,20 +3,22 @@
 # -*- coding: utf-8 -*-
 
 """
-POKEDEX ACETIQUE V6.1
-Détection anticipée des nouveaux Pokémon.
+POKEDEX ACETIQUE V6.2
+Détection anticipée intelligente PRO.
 
-- Recherche les annonces actuelles et historiques.
-- Analyse uniquement les annonces officielles.
-- Exclut les produits, événements et faux positifs.
-- Détecte les noms potentiels de nouvelles espèces.
-- Compare les candidats avec PokéAPI et les noms FR/EN.
-- Conserve les décisions manuelles.
-- Génère un rapport détaillé.
-- Inclut des tests automatiques.
-- N'ajoute jamais de Pokémon au catalogue.
+Fonctions :
+- Analyse les annonces officielles actuelles et historiques.
+- Détecte plusieurs noms de Pokémon dans une annonce.
+- Reconnaît les annonces de présentation et de révélation.
+- Écarte les noms déjà présents dans PokéAPI.
+- Distingue les noms provisoires déjà présents sur le site.
+- Filtre les produits, jeux et événements.
+- Classe les candidats FORT / MOYEN / FAIBLE.
+- Journalise les annonces potentiellement manquées.
+- Préserve les décisions de validation manuelle.
+- Ne modifie jamais le catalogue principal.
 
-Bibliothèque standard Python uniquement.
+Aucune dépendance Python externe.
 
 Commandes :
     python detecter_nouveaux_pokemon.py
@@ -36,24 +38,17 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
-VERSION = "6.1"
+VERSION = "6.2"
 DATA = Path("data")
 
 OUTPUT = DATA / "pokemon-a-verifier.json"
 REPORT = DATA / "rapport-detection-v6.json"
+MISSED = DATA / "annonces-non-reconnues.json"
+
 VALIDATIONS = DATA / "validation-pokemon.json"
+CACHE = DATA / "pokeapi-cache.json"
+BILINGUAL = DATA / "noms-pokemon-fr.json"
 
-POKEAPI_CACHE = DATA / "pokeapi-cache.json"
-BILINGUAL_NAMES = DATA / "noms-pokemon-fr.json"
-
-POKEAPI_URL = (
-    "https://pokeapi.co/api/v2/"
-    "pokemon-species?limit=2000"
-)
-
-# Fichiers produits ou susceptibles d'être produits
-# par le collecteur. Seuls les fichiers existants
-# seront utilisés.
 NEWS_FILES = [
     "nouveautes-pokemon.json",
     "annonces-prioritaires.json",
@@ -61,16 +56,22 @@ NEWS_FILES = [
     "official-news-review.json",
 ]
 
+POKEAPI_URL = (
+    "https://pokeapi.co/api/v2/"
+    "pokemon-species?limit=2000"
+)
+
 PROVISIONAL = {
     "browt",
     "pombon",
     "gecqua",
 }
 
-EXCLUDED_NAMES = {
-    "animated", "animation", "anime",
-    "app", "apps", "battle", "battles",
-    "beauty", "book", "books",
+# Termes qui ne constituent pas des noms de Pokémon.
+STOPWORDS = {
+    "a", "an", "and", "are", "at",
+    "available", "battle", "battles",
+    "beauty", "best", "book", "books",
     "card", "cards", "center",
     "champion", "champions",
     "championship", "championships",
@@ -78,30 +79,31 @@ EXCLUDED_NAMES = {
     "contest", "contests",
     "day", "direct", "event", "events",
     "expansion", "expansions",
-    "festival", "friends",
+    "festival", "first", "friends",
     "fundamentals", "game", "games",
     "gallery", "gift", "gifts",
     "guide", "home", "illustration",
     "league", "legends", "live",
     "machine", "movie", "news",
+    "new", "now", "of", "on",
     "pack", "packs", "paldea",
     "perfect", "pinball", "plush",
     "presents", "primer", "primers",
-    "prize", "prizes",
-    "product", "products",
-    "region", "regions",
+    "prize", "prizes", "product",
+    "products", "region", "regions",
     "release", "series",
     "sinnoh", "sinnohs",
     "snap", "store", "supplies",
-    "tcg", "top", "trading",
+    "tcg", "the", "these", "this",
+    "those", "top", "trading",
     "trailer", "update", "updates",
     "video", "videos",
     "winner", "winners",
     "world", "worlds",
-    "the", "this", "these",
-    "those", "new", "first",
 }
 
+# Contextes qui désignent généralement un produit
+# ou un événement et non une nouvelle espèce.
 EXCLUDED_CONTEXTS = [
     r"\bpokemon\s+home\b",
     r"\bpokemon\s+presents\b",
@@ -120,68 +122,99 @@ EXCLUDED_CONTEXTS = [
     r"\bschool\s+supplies\b",
 ]
 
-# Règles de détection, classées par fiabilité.
-# Les scores sont heuristiques : ils ne représentent
-# pas une probabilité de confirmation officielle.
-PATTERNS = [
+# Expressions précises indiquant qu'un nom est
+# présenté explicitement comme une nouvelle espèce.
+STRONG_PATTERNS = [
     (
         95,
-        "Espèce explicitement nommée",
-        r"\b(?:new|brand new)\s+"
-        r"pokemon\s+species\s+"
+        "Nouvelle espèce explicitement nommée",
+        r"\bnew\s+pokemon\s+species\s+"
         r"(?:named|called)\s+"
-        r"([A-Za-z][A-Za-z'-]{2,24})\b",
+        r"(?P<names>[A-Za-z][A-Za-z'-]{2,24}"
+        r"(?:\s*,\s*[A-Za-z][A-Za-z'-]{2,24})*"
+        r"(?:\s*,?\s+and\s+"
+        r"[A-Za-z][A-Za-z'-]{2,24})?)",
     ),
     (
         90,
         "Nouveau Pokémon nommé",
-        r"\b(?:new|brand new)\s+"
-        r"pokemon\s+(?:named|called)\s+"
-        r"([A-Za-z][A-Za-z'-]{2,24})\b",
+        r"\b(?:new|brand new)\s+pokemon\s+"
+        r"(?:named|called)\s+"
+        r"(?P<names>[A-Za-z][A-Za-z'-]{2,24}"
+        r"(?:\s*,\s*[A-Za-z][A-Za-z'-]{2,24})*"
+        r"(?:\s*,?\s+and\s+"
+        r"[A-Za-z][A-Za-z'-]{2,24})?)",
     ),
     (
         90,
-        "Présentation explicite",
+        "Présentation officielle explicite",
         r"\b(?:meet|introducing|discover)\s+"
         r"(?:the\s+)?(?:brand\s+)?new\s+"
         r"pokemon\s+(?:named|called)\s+"
-        r"([A-Za-z][A-Za-z'-]{2,24})\b",
+        r"(?P<names>[A-Za-z][A-Za-z'-]{2,24}"
+        r"(?:\s*,\s*[A-Za-z][A-Za-z'-]{2,24})*"
+        r"(?:\s*,?\s+and\s+"
+        r"[A-Za-z][A-Za-z'-]{2,24})?)",
     ),
     (
         85,
-        "Révélation d'une nouvelle espèce",
-        r"\b([A-Za-z][A-Za-z'-]{2,24})\s+"
-        r"(?:is|has been)\s+"
+        "Nouvelle espèce révélée",
+        r"\b(?P<names>[A-Za-z][A-Za-z'-]{2,24})"
+        r"\s+(?:is|has been)\s+"
         r"(?:officially\s+)?revealed\s+"
         r"as\s+a\s+new\s+pokemon\b",
     ),
+]
+
+# Expressions plus souples :
+# les noms sont retenus comme candidats
+# à examiner, pas comme espèces confirmées.
+MEDIUM_PATTERNS = [
     (
-        80,
-        "Présentation avec description",
-        r"\b(?:meet|introducing)\s+"
-        r"([A-Za-z][A-Za-z'-]{2,24})\s*"
-        r"[,:\-]\s*(?:a|the)\s+"
-        r"(?:brand\s+)?new\s+pokemon\b",
+        78,
+        "Présentation de nouveaux Pokémon",
+        r"\b(?:meet|discover|introducing)\s+"
+        r"(?:the\s+)?new\s+pokemon\s+"
+        r"(?P<names>[A-Za-z][A-Za-z'-]{2,24}"
+        r"(?:\s*,\s*[A-Za-z][A-Za-z'-]{2,24})*"
+        r"(?:\s*,?\s+and\s+"
+        r"[A-Za-z][A-Za-z'-]{2,24})?)",
     ),
     (
         75,
-        "Nouvelle espèce présentée",
-        r"\b(?:meet|introducing)\s+"
-        r"(?:the\s+)?(?:new|newly discovered)\s+"
-        r"pokemon\s+([A-Za-z][A-Za-z'-]{2,24})"
-        r"(?=\s*[,.:;!?-]|\s*$)",
+        "Présentation d'une nouvelle espèce",
+        r"\b(?:meet|introducing|discover)\s+"
+        r"(?P<names>[A-Za-z][A-Za-z'-]{2,24})"
+        r"\s*[,:\-]\s*(?:a|an)\s+"
+        r"(?:brand\s+)?new\s+pokemon\b",
     ),
     (
-        70,
-        "Nom présenté comme Pokémon",
-        r"\b(?:meet|introducing)\s+"
-        r"([A-Za-z][A-Za-z'-]{2,24})\s*"
-        r"[,:\-]\s*(?:a|an)\s+pokemon\b",
+        72,
+        "Noms annoncés comme nouveaux Pokémon",
+        r"\b(?P<names>[A-Za-z][A-Za-z'-]{2,24}"
+        r"(?:\s*,\s*[A-Za-z][A-Za-z'-]{2,24})*"
+        r"(?:\s*,?\s+and\s+"
+        r"[A-Za-z][A-Za-z'-]{2,24})?)"
+        r"\s+(?:are|have been)\s+"
+        r"revealed\s+as\s+new\s+pokemon\b",
     ),
 ]
 
+# Titres potentiellement intéressants,
+# même si aucun nom n'a été extrait.
+REVIEW_PATTERNS = [
+    r"\bnew\s+pokemon\b",
+    r"\bnewly\s+discovered\s+pokemon\b",
+    r"\bnew\s+pokemon\s+species\b",
+    r"\bpokemon\s+revealed\b",
+    r"\bintroducing\s+.*pokemon\b",
+    r"\bmeet\s+.*pokemon\b",
+    r"\bdiscover\s+.*pokemon\b",
+    r"\breveal(?:ed|s)?\s+.*pokemon\b",
+]
 
-def timestamp():
+
+def now_iso():
     return datetime.now(
         timezone.utc
     ).isoformat()
@@ -205,7 +238,7 @@ def normalize(value):
     )
 
 
-def load_json(path, default=None):
+def read_json(path, default=None):
     if not path.exists():
         return default
 
@@ -218,13 +251,12 @@ def load_json(path, default=None):
 
     except (OSError, ValueError) as error:
         print(
-            f"[V6.1] Erreur lecture "
-            f"{path}: {error}"
+            f"[V6.2] Erreur lecture {path}: {error}"
         )
         return default
 
 
-def save_json(path, content):
+def write_json(path, content):
     path.parent.mkdir(
         parents=True,
         exist_ok=True
@@ -237,8 +269,8 @@ def save_json(path, content):
         json.dump(
             content,
             file,
-            indent=2,
-            ensure_ascii=False
+            ensure_ascii=False,
+            indent=2
         )
         file.write("\n")
 
@@ -246,29 +278,19 @@ def save_json(path, content):
 def official_url(url):
     try:
         parsed = urlparse(url)
-        host = (parsed.hostname or "").lower()
 
         return (
             parsed.scheme in ("http", "https")
-            and host in (
-                "pokemon.com",
-                "www.pokemon.com"
-            )
+            and (parsed.hostname or "").lower()
+            in ("pokemon.com", "www.pokemon.com")
         )
 
-    except (TypeError, ValueError):
+    except (ValueError, TypeError):
         return False
 
 
 def collect_articles(data):
-    """
-    Recherche récursivement les objets contenant
-    un titre et une URL officielle.
-
-    Les listes de simples URL sans titres ne
-    suffisent pas pour une détection de noms.
-    """
-    results = {}
+    found = {}
 
     def walk(value, depth=0):
         if depth > 20:
@@ -306,7 +328,7 @@ def collect_articles(data):
                 break
 
         if title and url and official_url(url):
-            results[url] = {
+            found[url] = {
                 "title": title,
                 "url": url
             }
@@ -317,15 +339,11 @@ def collect_articles(data):
 
     walk(data)
 
-    return list(results.values())
+    return list(found.values())
 
 
-def load_all_articles():
-    """
-    Charge tous les fichiers historiques connus.
-    Aucun plafond artificiel de 100 articles.
-    """
-    all_articles = {}
+def load_articles():
+    articles = {}
     statistics = {}
 
     for filename in NEWS_FILES:
@@ -334,29 +352,29 @@ def load_all_articles():
         if not path.exists():
             statistics[filename] = {
                 "exists": False,
-                "articles": 0
+                "articles": 0,
             }
             continue
 
-        content = load_json(path)
-        articles = collect_articles(content)
+        source = read_json(path)
+        items = collect_articles(source)
 
         statistics[filename] = {
             "exists": True,
-            "articles": len(articles)
+            "articles": len(items),
         }
 
-        for article in articles:
-            all_articles[article["url"]] = article
+        for item in items:
+            articles[item["url"]] = item
 
-    return list(all_articles.values()), statistics
+    return list(articles.values()), statistics
 
 
-def fetch_pokeapi():
+def fetch_species():
     request = Request(
         POKEAPI_URL,
         headers={
-            "User-Agent": "PokedexAcetique/6.1",
+            "User-Agent": "PokedexAcetique/6.2",
             "Accept": "application/json",
         }
     )
@@ -383,7 +401,10 @@ def collect_known_names(data):
         if not isinstance(value, dict):
             return
 
-        # Structure PokéAPI.
+        if value.get("provisional") is True:
+            return
+
+        # Réponse PokéAPI.
         if (
             isinstance(value.get("name"), str)
             and isinstance(value.get("url"), str)
@@ -391,44 +412,42 @@ def collect_known_names(data):
         ):
             names.add(normalize(value["name"]))
 
-        # Noms bilingues.
-        if value.get("provisional") is not True:
-            for key in (
-                "fr", "en",
-                "french", "english",
-                "nom_fr", "nom_en",
-                "name_fr", "name_en"
-            ):
-                name = value.get(key)
+        # Noms bilingues locaux.
+        for key in (
+            "fr", "en",
+            "french", "english",
+            "nom_fr", "nom_en",
+            "name_fr", "name_en"
+        ):
+            item = value.get(key)
 
-                if isinstance(name, str):
-                    names.add(normalize(name))
+            if isinstance(item, str):
+                names.add(normalize(item))
 
-        # Noms officiels par langue.
-        entries = value.get("names")
+        # Traductions au format PokéAPI.
+        translations = value.get("names")
 
-        if isinstance(entries, list):
-            for entry in entries:
-                if not isinstance(entry, dict):
+        if isinstance(translations, list):
+            for translation in translations:
+                if not isinstance(translation, dict):
                     continue
 
-                language = entry.get("language")
+                language = translation.get("language")
 
                 if isinstance(language, dict):
                     language = language.get("name")
 
-                if language in ("fr", "en"):
-                    name = entry.get("name")
+                if language in ("en", "fr"):
+                    name = translation.get("name")
 
                     if isinstance(name, str):
                         names.add(normalize(name))
 
         for item in value.values():
-            if isinstance(item, (dict, list)):
+            if isinstance(item, (list, dict)):
                 walk(item, depth + 1)
 
     walk(data)
-
     names.discard("")
 
     return names
@@ -439,37 +458,33 @@ def load_known_species():
 
     names.update(
         collect_known_names(
-            load_json(POKEAPI_CACHE, {})
+            read_json(CACHE, {})
         )
     )
 
     names.update(
         collect_known_names(
-            load_json(BILINGUAL_NAMES, {})
+            read_json(BILINGUAL, {})
         )
     )
 
     source = "cache local"
 
     try:
-        response = fetch_pokeapi()
+        response = fetch_species()
 
-        api_names = {
-            normalize(item["name"])
-            for item in response.get(
-                "results", []
-            )
-            if isinstance(item, dict)
-            and isinstance(item.get("name"), str)
-        }
+        for item in response.get("results", []):
+            if isinstance(item, dict):
+                name = item.get("name")
 
-        if api_names:
-            names.update(api_names)
-            source = "PokéAPI + cache local"
+                if name:
+                    names.add(normalize(name))
+
+        source = "PokéAPI + cache local"
 
     except Exception as error:
         print(
-            "[V6.1] PokéAPI indisponible :",
+            "[V6.2] PokéAPI indisponible :",
             error
         )
 
@@ -477,7 +492,7 @@ def load_known_species():
 
 
 def load_validations():
-    raw = load_json(VALIDATIONS, {})
+    raw = read_json(VALIDATIONS, {})
 
     if not isinstance(raw, dict):
         return {}
@@ -498,18 +513,13 @@ def load_validations():
         status = normalize(status)
 
         if status in (
-            "valide",
-            "validemanuellement",
-            "confirme",
-            "approved",
-            "validated"
+            "valide", "validemanuellement",
+            "confirme", "approved", "validated"
         ):
             result[normalize(name)] = "valide"
 
         elif status in (
-            "rejete",
-            "rejected",
-            "refuse"
+            "rejete", "rejected", "refuse"
         ):
             result[normalize(name)] = "rejete"
 
@@ -527,67 +537,116 @@ def excluded_context(title):
     )
 
 
-def extract_names(title):
+def split_names(text):
+    """
+    Sépare les noms :
+      Browt, Pombon and Gecqua
+
+    Ne découpe pas les noms composés arbitrairement.
+    """
+    text = text.strip(" ,.:;!?-")
+
+    text = re.sub(
+        r"\s*,?\s+\band\b\s+",
+        ",",
+        text,
+        flags=re.I
+    )
+
+    result = []
+
+    for item in text.split(","):
+        name = item.strip()
+
+        if not re.fullmatch(
+            r"[A-Za-z][A-Za-z'-]{2,24}",
+            name
+        ):
+            continue
+
+        key = normalize(name)
+
+        if key in STOPWORDS:
+            continue
+
+        result.append(name)
+
+    return result
+
+
+def extract_candidates(title):
     results = {}
 
-    title = re.sub(
-        r"\s+",
-        " ",
-        str(title).replace("’", "'")
-    ).strip()
+    patterns = (
+        STRONG_PATTERNS
+        + MEDIUM_PATTERNS
+    )
 
-    for score, reason, pattern in PATTERNS:
+    for score, reason, pattern in patterns:
         for match in re.finditer(
             pattern,
             title,
             flags=re.I
         ):
-            name = match.group(1).strip(
-                " ,.:;!?-"
-            )
+            raw_names = match.group("names")
 
-            key = normalize(name)
+            for name in split_names(raw_names):
+                key = normalize(name)
 
-            if not key:
-                continue
+                if key not in results:
+                    results[key] = {
+                        "name": name,
+                        "score": score,
+                        "reason": reason,
+                    }
 
-            if len(key) < 3:
-                continue
-
-            if key in EXCLUDED_NAMES:
-                continue
-
-            if key not in results:
-                results[key] = (
-                    name, score, reason
-                )
-
-            elif score > results[key][1]:
-                results[key] = (
-                    name, score, reason
-                )
+                elif score > results[key]["score"]:
+                    results[key] = {
+                        "name": name,
+                        "score": score,
+                        "reason": reason,
+                    }
 
     return list(results.values())
 
 
+def confidence_level(score):
+    if score >= 85:
+        return "FORT"
+
+    if score >= 70:
+        return "MOYEN"
+
+    return "FAIBLE"
+
+
+def should_review(title):
+    return any(
+        re.search(
+            pattern,
+            title,
+            flags=re.I
+        )
+        for pattern in REVIEW_PATTERNS
+    )
+
+
 def load_previous():
-    raw = load_json(OUTPUT, {})
+    raw = read_json(OUTPUT, {})
 
     if not isinstance(raw, dict):
         return {}
 
-    result = {}
+    previous = {}
 
     for item in raw.get("candidates", []):
-        if not isinstance(item, dict):
-            continue
+        if isinstance(item, dict):
+            name = item.get("name")
 
-        name = item.get("name", "")
+            if name:
+                previous[normalize(name)] = item
 
-        if name:
-            result[normalize(name)] = item
-
-    return result
+    return previous
 
 
 def detect():
@@ -596,58 +655,51 @@ def detect():
         exist_ok=True
     )
 
-    print("=" * 50)
+    print("=" * 52)
     print("POKEDEX ACETIQUE")
-    print("DÉTECTION ANTICIPÉE V6.1")
-    print("=" * 50)
+    print("DÉTECTION ANTICIPÉE PRO V6.2")
+    print("=" * 52)
 
-    articles, file_stats = load_all_articles()
+    articles, sources = load_articles()
 
     print("")
-    print("SOURCES D'ANNONCES :")
+    print("SOURCES HISTORIQUES :")
 
-    for filename, stats in file_stats.items():
-        state = (
-            "OK"
-            if stats["exists"]
-            else "ABSENT"
-        )
-
+    for filename, stats in sources.items():
         print(
             f"- {filename} : "
-            f"{stats['articles']} articles "
-            f"({state})"
+            f"{stats['articles']} articles"
         )
 
     print("")
     print(
-        "[V6.1] Articles uniques :",
+        "[V6.2] Articles uniques :",
         len(articles)
     )
 
     if not articles:
         print(
-            "[V6.1] ERREUR : aucune annonce "
-            "officielle exploitable."
+            "[V6.2] ERREUR : "
+            "aucune annonce officielle."
         )
         return 1
 
     known, known_source = load_known_species()
 
     print(
-        "[V6.1] Noms connus :",
+        "[V6.2] Noms connus :",
         len(known)
     )
 
     print(
-        "[V6.1] Source espèces :",
+        "[V6.2] Référence :",
         known_source
     )
 
     if len(known) < 1000:
         print(
-            "[V6.1] ERREUR : référence "
-            "des espèces incomplète."
+            "[V6.2] ERREUR : "
+            "référence des espèces incomplète."
         )
         return 1
 
@@ -663,40 +715,54 @@ def detect():
         }
     )
 
-    excluded_articles = 0
-    matches_count = 0
-    known_matches = 0
-    rejected_matches = 0
+    missed = []
+
+    excluded = 0
+    matches = 0
+    existing = 0
+    rejected = 0
 
     for article in articles:
         title = article["title"]
         url = article["url"]
 
         if excluded_context(title):
-            excluded_articles += 1
+            excluded += 1
             continue
 
-        matches = extract_names(title)
+        candidates = extract_candidates(title)
 
-        for name, score, reason in matches:
-            matches_count += 1
+        if not candidates and should_review(title):
+            missed.append({
+                "title": title,
+                "url": url,
+                "reason": (
+                    "Annonce potentiellement pertinente "
+                    "sans nom extrait"
+                ),
+            })
+
+        for item in candidates:
+            matches += 1
+
+            name = item["name"]
             key = normalize(name)
 
             if key in known:
-                known_matches += 1
+                existing += 1
                 continue
 
             if validations.get(key) == "rejete":
-                rejected_matches += 1
+                rejected += 1
                 continue
 
             candidate = detected[key]
 
             candidate["name"] = name
 
-            if score > candidate["score"]:
-                candidate["score"] = score
-                candidate["reason"] = reason
+            if item["score"] > candidate["score"]:
+                candidate["score"] = item["score"]
+                candidate["reason"] = item["reason"]
 
             if not any(
                 source["url"] == url
@@ -709,9 +775,16 @@ def detect():
 
     candidates = []
 
-    for key, candidate in detected.items():
-        previous_candidate = previous.get(
-            key, {}
+    for key, item in detected.items():
+        old = previous.get(key, {})
+
+        score = min(
+            95,
+            item["score"]
+            + min(
+                max(len(item["sources"]) - 1, 0) * 3,
+                9
+            )
         )
 
         status = (
@@ -720,35 +793,21 @@ def detect():
             else "a_verifier"
         )
 
-        sources_count = len(
-            candidate["sources"]
-        )
-
-        score = min(
-            95,
-            candidate["score"]
-            + min(
-                max(sources_count - 1, 0) * 3,
-                9
-            )
-        )
-
         candidates.append({
-            "name": candidate["name"],
+            "name": item["name"],
             "status": status,
             "score": score,
-            "reason": candidate["reason"],
-            "first_detected": (
-                previous_candidate.get(
-                    "first_detected",
-                    timestamp()
-                )
+            "confidence": confidence_level(score),
+            "reason": item["reason"],
+            "first_detected": old.get(
+                "first_detected",
+                now_iso()
             ),
             "already_in_site_provisionally": (
                 key in PROVISIONAL
             ),
             "verified_by_pokeapi": False,
-            "sources": candidate["sources"],
+            "sources": item["sources"],
         })
 
     candidates.sort(
@@ -756,6 +815,10 @@ def detect():
             -item["score"],
             item["name"].lower()
         )
+    )
+
+    missed.sort(
+        key=lambda item: item["title"].lower()
     )
 
     pending = sum(
@@ -768,64 +831,65 @@ def detect():
         for item in candidates
     )
 
-    old_false_positives = sorted(
+    removed = sorted(
         previous[key].get("name", key)
         for key in previous
         if key not in detected
     )
 
-    checked_at = timestamp()
+    checked_at = now_iso()
 
     output = {
         "version": VERSION,
         "checked_at": checked_at,
         "method": (
-            "historical_official_titles_"
+            "multi_name_official_announcement_"
             "contextual_detection"
         ),
         "known_species_count": len(known),
         "articles_analyzed": len(articles),
         "candidate_count": len(candidates),
         "pending_review_count": pending,
-        "rejected_count": sum(
-            value == "rejete"
-            for value in validations.values()
-        ),
         "manually_validated_count": validated,
         "candidates": candidates,
         "notice": (
-            "Candidats non confirmés. "
-            "Aucun ajout automatique au Pokédex."
-        )
+            "Aucun candidat n'est ajouté "
+            "automatiquement au Pokédex."
+        ),
     }
 
     report = {
         "version": VERSION,
         "checked_at": checked_at,
-        "sources": file_stats,
+        "sources": sources,
         "articles_analyzed": len(articles),
-        "excluded_product_event_articles": (
-            excluded_articles
-        ),
-        "pattern_matches": matches_count,
-        "existing_species_matches": known_matches,
-        "rejected_matches": rejected_matches,
+        "excluded_product_event_articles": excluded,
+        "pattern_matches": matches,
+        "existing_species_matches": existing,
+        "rejected_matches": rejected,
         "candidate_count": len(candidates),
         "pending_review_count": pending,
         "validated_count": validated,
+        "unrecognized_announcements": len(missed),
         "reference_source": known_source,
-        "excluded_old_false_positives": (
-            old_false_positives
-        ),
+        "excluded_old_false_positives": removed,
     }
 
-    save_json(OUTPUT, output)
-    save_json(REPORT, report)
+    missed_output = {
+        "version": VERSION,
+        "checked_at": checked_at,
+        "count": len(missed),
+        "announcements": missed,
+    }
+
+    write_json(OUTPUT, output)
+    write_json(REPORT, report)
+    write_json(MISSED, missed_output)
 
     print("")
-    print("=" * 50)
-    print("RÉSULTATS V6.1")
-    print("=" * 50)
+    print("=" * 52)
+    print("RÉSULTATS V6.2")
+    print("=" * 52)
 
     print(
         "Articles analysés :",
@@ -834,21 +898,21 @@ def detect():
 
     print(
         "Articles exclus par contexte :",
-        excluded_articles
+        excluded
     )
 
     print(
         "Correspondances détectées :",
-        matches_count
+        matches
     )
 
     print(
         "Espèces déjà connues exclues :",
-        known_matches
+        existing
     )
 
     print(
-        "Candidats potentiels :",
+        "Nouveaux candidats :",
         len(candidates)
     )
 
@@ -858,8 +922,8 @@ def detect():
     )
 
     print(
-        "Validés manuellement :",
-        validated
+        "Annonces non reconnues :",
+        len(missed)
     )
 
     print("")
@@ -867,31 +931,36 @@ def detect():
 
     if not candidates:
         print(
-            "Aucun nouveau Pokémon potentiel "
-            "détecté."
+            "Aucun nouveau Pokémon potentiel détecté."
         )
 
-    for candidate in candidates:
+    for item in candidates:
         print(
-            f"- {candidate['name']} | "
-            f"score={candidate['score']} | "
-            f"{candidate['status']}"
+            f"- {item['name']} | "
+            f"{item['confidence']} | "
+            f"score={item['score']} | "
+            f"{item['status']}"
         )
 
     print("")
     print(
-        "[V6.1] Rapport :",
+        "[V6.2] Rapport :",
         REPORT
     )
 
     print(
-        "[V6.1] Résultats :",
+        "[V6.2] Annonces non reconnues :",
+        MISSED
+    )
+
+    print(
+        "[V6.2] Candidats :",
         OUTPUT
     )
 
     print(
-        "[V6.1] Aucun Pokémon ajouté "
-        "automatiquement."
+        "[V6.2] Aucun ajout automatique "
+        "au Pokédex."
     )
 
     return 0
@@ -918,70 +987,77 @@ def run_tests():
         if excluded_context(title):
             continue
 
-        assert not extract_names(title), (
+        assert not extract_candidates(title), (
             f"Faux positif : {title}"
         )
 
     positive_tests = [
         (
             "Meet the new Pokemon named Testmon",
-            "testmon"
+            {"testmon"}
         ),
         (
             "Introducing the new Pokemon called Novamon",
-            "novamon"
+            {"novamon"}
         ),
         (
             "New Pokemon species named Floramon",
-            "floramon"
+            {"floramon"}
         ),
         (
             "Meet the new Pokemon Lunamon!",
-            "lunamon"
+            {"lunamon"}
         ),
         (
             "Meet Aquamon, a new Pokemon",
-            "aquamon"
+            {"aquamon"}
+        ),
+        (
+            "Meet the new Pokemon Browt, Pombon and Gecqua",
+            {"browt", "pombon", "gecqua"}
         ),
     ]
 
     for title, expected in positive_tests:
-        names = {
-            normalize(item[0])
-            for item in extract_names(title)
+        found = {
+            normalize(item["name"])
+            for item in extract_candidates(title)
         }
 
-        assert expected in names, (
-            f"Détection manquée : {title}"
+        assert expected.issubset(found), (
+            f"Détection manquée : {title} "
+            f"Trouvés : {found}"
         )
 
-    # Vérification du dédoublonnage.
-    example = [
-        {
-            "title": "Meet the new Pokemon Testmon!",
-            "url": (
-                "https://www.pokemon.com/"
-                "us/news/testmon"
-            )
-        }
-    ]
+    assert official_url(
+        "https://www.pokemon.com/us/news/test"
+    )
 
-    assert len(
-        collect_articles(example + example)
-    ) == 1
-
-    # Vérification du domaine officiel.
     assert not official_url(
         "https://pokemon.com.example.org/fake"
     )
 
-    print("=" * 50)
-    print("TESTS AUTOMATIQUES V6.1")
-    print("=" * 50)
-    print("Faux positifs : OK")
+    duplicate = [
+        {
+            "title": "Meet the new Pokemon Testmon!",
+            "url": "https://www.pokemon.com/us/news/test"
+        }
+    ]
+
+    assert len(
+        collect_articles(duplicate + duplicate)
+    ) == 1
+
+    print("=" * 52)
+    print("TESTS AUTOMATIQUES V6.2")
+    print("=" * 52)
+
+    print("Faux positifs historiques : OK")
     print("Détection de noms fictifs : OK")
+    print("Détection de plusieurs noms : OK")
+    print("Vérification des URL : OK")
     print("Dédoublonnage : OK")
-    print("Vérification du domaine : OK")
+
     print("")
     print("TOUS LES TESTS SONT RÉUSSIS")
 
@@ -994,7 +1070,7 @@ def main():
     parser.add_argument(
         "--test",
         action="store_true",
-        help="Exécuter les tests automatiques"
+        help="Lancer les tests automatiques"
     )
 
     args = parser.parse_args()
