@@ -1,6 +1,6 @@
 {
-  "version": "5.4.1",
-  "checked_at": "2026-10-13T03:42:45.783613+00:00",
+  "version": "5.5",
+  "checked_at": "2026-10-13T03:53:49.174429+00:00",
   "status": "ok",
   "source": "live",
   "pokeapi_max_species_id": 1025,
@@ -47,5 +47,6 @@
     ]
   ],
   "index_modified": false,
-  "cache_updated_at": "2026-10-13T03:42:45.782322+00:00"
+  "cache_updated_at": "2026-10-13T03:53:49.159033+00:00",
+  "error": null
 }
