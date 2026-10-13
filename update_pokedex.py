@@ -3,29 +3,32 @@
 # -*- coding: utf-8 -*-
 
 """
-POKEDEX ACETIQUE V5.5
+POKEDEX ACETIQUE V5.6
 =====================
 
-Mise à jour du Pokédex et surveillance des annonces
-officielles de nouveaux Pokémon.
+Actualisation automatique du catalogue Pokémon
+et surveillance des annonces officielles.
 
-Python 3.11+.
+Python 3.11+
 Bibliothèque standard uniquement.
 Aucune clé API payante.
 
-Fonctions :
-- PokéAPI avec retentatives et cache local
-- Actualisation des générations dans index.html
-- Préservation des Pokémon provisoires de génération 10
-- Découverte des articles officiels Pokémon
-- Extraction HTML, JSON-LD et données structurées
-- Détection des pages génériques
-- Analyse de secours à partir des titres officiels
-- Classement prioritaire des annonces de nouveaux Pokémon
-- Distinction espèces, formes et Méga-Évolutions
+Fonctionnalités :
+- PokéAPI avec cache et retentatives
+- Détection des nouvelles espèces officielles
+- Comparaison avec le catalogue précédent
+- Actualisation de index.html
+- Conservation des Pokémon provisoires
+- Collecte des actualités Pokémon
+- Extraction HTML et JSON-LD
+- Détection des pages antibot
+- Analyse des titres en secours
+- Priorité aux nouvelles espèces
+- Surveillance génération 10
+- Distinction espèces / formes / Méga
 - Historique permanent
-- Aucun ajout automatique d'espèce non confirmée
-- Rapports JSON compatibles avec la V5.4.1
+- Limitation des requêtes répétitives
+- Rapports JSON
 """
 
 import datetime as dt
@@ -47,22 +50,25 @@ import xml.etree.ElementTree as ET
 # CONFIGURATION
 # ============================================================
 
-VERSION = "5.5"
+VERSION = "5.6"
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 
 API = "https://pokeapi.co/api/v2"
+
 SITE = "https://www.pokemon.com"
 NEWS = SITE + "/us/pokemon-news"
 
+SITEMAPS = [
+    SITE + "/sitemap.xml",
+    SITE + "/us/news/sitemap.xml",
+]
+
 HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 "
-        "(X11; Linux x86_64) "
-        "AppleWebKit/537.36 "
-        "(KHTML, like Gecko) "
-        "Chrome/120.0 Safari/537.36"
+        "PokedexAcetique/5.6 "
+        "(public catalogue updater)"
     ),
     "Accept": (
         "text/html,application/xhtml+xml,"
@@ -71,105 +77,120 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 
-REQUEST_TIMEOUT = 35
-MAX_ATTEMPTS = 4
-REQUEST_DELAY = 0.30
+API_TIMEOUT = 40
+NEWS_TIMEOUT = 18
 
-MAX_ARTICLES_PER_RUN = 35
+API_ATTEMPTS = 4
+NEWS_ATTEMPTS = 2
+
+REQUEST_DELAY = 0.5
+
+MAX_ARTICLES_PER_RUN = 20
 MAX_VISIBLE_ARTICLES = 100
 MAX_PRIORITY_ARTICLES = 60
 MAX_HISTORY_ARTICLES = 10000
 
 MIN_ARTICLE_TEXT = 180
-GENERIC_FINGERPRINT_THRESHOLD = 3
 
-# Ne pas réinspecter quotidiennement les anciennes pages
 RECHECK_OK_DAYS = 30
 RECHECK_GENERIC_DAYS = 14
-RECHECK_ERROR_DAYS = 3
+RECHECK_ERROR_DAYS = 7
 
-SITEMAPS = [
-    SITE + "/sitemap.xml",
-    SITE + "/us/news/sitemap.xml",
-]
+GENERIC_FINGERPRINT_THRESHOLD = 3
 
-# Entrées provisoires déjà prévues dans le site.
 MANUAL_POKEMON = {
     "browt",
     "pombon",
     "gecqua",
 }
 
-# Indices forts d'une nouvelle espèce.
+# Signaux indiquant potentiellement une nouvelle espèce.
 SPECIES_PATTERNS = [
     r"\bnewly discovered pok[eé]mon\b",
     r"\bnew pok[eé]mon species\b",
     r"\bnew species of pok[eé]mon\b",
-    r"\bbrand.new pok[eé]mon\b",
     r"\bnever.before.seen pok[eé]mon\b",
     r"\bnew pok[eé]mon (?:revealed|unveiled)\b",
-    r"\bmeet (?:the )?new pok[eé]mon\b",
     r"\bintroducing (?:a |the )?new pok[eé]mon\b",
+    r"\bmeet (?:the )?new pok[eé]mon\b",
+    r"\bbrand.new pok[eé]mon\b",
     r"\bthree new partner pok[eé]mon\b",
+    r"\bnew starter pok[eé]mon\b",
 ]
 
-# Indices généraux de génération 10.
 GEN10_PATTERNS = [
     r"\bpok[eé]mon winds\b",
     r"\bpok[eé]mon waves\b",
     r"\bgeneration 10\b",
     r"\bgen 10\b",
-    r"\bnew starter pok[eé]mon\b",
     r"\bnew first.partner pok[eé]mon\b",
     r"\bnew region\b",
-    r"\bnew pok[eé]mon game\b",
 ]
 
-# Les formes ne sont pas des espèces supplémentaires.
 FORM_PATTERNS = [
     r"\bmega.evol(?:ved|ution)\b",
     r"\bmega [a-z][a-z-]+\b",
-    r"\bgigantamax\b",
-    r"\bdynamax\b",
+    r"\bnew mega.evolution\b",
     r"\bregional form\b",
     r"\bnew form of\b",
+    r"\bgigantamax\b",
     r"\bprimal reversion\b",
-    r"\bterastal\b",
 ]
 
-LOW_PRIORITY_PATTERNS = [
+EXCLUSION_PATTERNS = [
     r"\btrading card\b",
     r"\btcg\b",
+    r"\bpromo cards?\b",
     r"\bmerchandise\b",
-    r"\bplush\b",
     r"\bpok[eé]mon center\b",
-    r"\bchampionship\b",
+    r"\bplush\b",
+    r"\bchampionships?\b",
     r"\btournament\b",
+    r"\bcompetition\b",
+    r"\branked battles?\b",
     r"\bcommunity day\b",
     r"\bpok[eé]mon go\b",
+    r"\bpok[eé]mon sleep\b",
+    r"\bpok[eé]mon unite\b",
     r"\bnetflix\b",
-    r"\bsoundtrack\b",
     r"\bspotify\b",
+    r"\bsoundtrack\b",
+    r"\bmerch\b",
+    r"\bbundle\b",
+    r"\bprizes?\b",
+    r"\bpok[eé]mon league\b",
+    r"\blivestream\b",
+]
+
+ANTIBOT_PATTERNS = [
+    "pardon our interruption",
+    "made us think you were a bot",
+    "verify you are human",
+    "access denied",
+    "captcha",
+    "enable javascript",
+    "please enable cookies",
+    "unusual traffic",
+    "automated access",
+    "checking your browser",
 ]
 
 STOPWORDS = set("""
-a about after all also an and are as at available
-be been before by can coming day discover discovered
-edition for from game games get has have here how
-in into is it its latest learn legends more most
-new news next now of official on or our out
-pokemon pokémon presents region reveal revealed
-see season show showing soon special starter starters
-the their these this three to trailer two update
-updates version watch what when where which with
-world worlds you your introducing meet first partner
-nintendo switch mega evolution evolved generation
-winds waves
+about after again also amazon and apple are
+available before brand coming discover discovered
+edition first for from game games generation
+have into introducing latest legends meet mega
+more most new news next nintendo now official
+our out partner pokemon pokémon region reveal
+revealed season see special starter starters
+switch their these this three trailer update
+version watch what when where which with world
+worlds winds waves your
 """.split())
 
 
 # ============================================================
-# FICHIERS ET JOURNAL
+# UTILITAIRES
 # ============================================================
 
 def log(message):
@@ -183,6 +204,15 @@ def utc_now():
     return dt.datetime.now(
         dt.timezone.utc
     ).isoformat()
+
+
+def clean(value):
+    if value is None:
+        return ""
+
+    return " ".join(
+        html.unescape(str(value)).split()
+    )
 
 
 def save_json(path, value):
@@ -199,7 +229,9 @@ def save_json(path, value):
 
     if (
         not path.exists()
-        or path.read_text(encoding="utf-8") != content
+        or path.read_text(
+            encoding="utf-8"
+        ) != content
     ):
         path.write_text(
             content,
@@ -210,19 +242,16 @@ def save_json(path, value):
 def load_json(path, default=None):
     try:
         return json.loads(
-            path.read_text(encoding="utf-8")
+            path.read_text(
+                encoding="utf-8"
+            )
         )
-    except (OSError, ValueError, TypeError):
+    except (
+        OSError,
+        ValueError,
+        TypeError
+    ):
         return default
-
-
-def clean(value):
-    if value is None:
-        return ""
-
-    return " ".join(
-        html.unescape(str(value)).split()
-    )
 
 
 def parse_date(value):
@@ -235,18 +264,23 @@ def parse_date(value):
         if raw.endswith("Z"):
             raw = raw[:-1] + "+00:00"
 
-        parsed = dt.datetime.fromisoformat(raw)
+        result = dt.datetime.fromisoformat(
+            raw
+        )
 
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(
+        if result.tzinfo is None:
+            result = result.replace(
                 tzinfo=dt.timezone.utc
             )
 
-        return parsed.astimezone(
+        return result.astimezone(
             dt.timezone.utc
         ).isoformat()
 
-    except (ValueError, TypeError):
+    except (
+        ValueError,
+        TypeError
+    ):
         return None
 
 
@@ -256,12 +290,16 @@ def age_days(value):
     if not parsed:
         return 999999
 
-    date = dt.datetime.fromisoformat(parsed)
+    date = dt.datetime.fromisoformat(
+        parsed
+    )
 
     return max(
         0,
         (
-            dt.datetime.now(dt.timezone.utc) - date
+            dt.datetime.now(
+                dt.timezone.utc
+            ) - date
         ).total_seconds() / 86400
     )
 
@@ -294,98 +332,19 @@ def matches(patterns, value):
     )
 
 
-# ============================================================
-# CONNEXION RÉSEAU
-# ============================================================
+def species_id(url):
+    result = re.search(
+        r"/pokemon-species/(\d+)/?$",
+        str(url)
+    )
 
-def fetch_response(url):
-    retryable_codes = {
-        408, 429, 500, 502, 503, 504
-    }
-
-    last_error = None
-
-    for attempt in range(
-        1,
-        MAX_ATTEMPTS + 1
-    ):
-        try:
-            request = urllib.request.Request(
-                url,
-                headers=HEADERS
-            )
-
-            with urllib.request.urlopen(
-                request,
-                timeout=REQUEST_TIMEOUT
-            ) as response:
-
-                raw = response.read(
-                    8_000_000
-                )
-
-                charset = (
-                    response.headers.get_content_charset()
-                    or "utf-8"
-                )
-
-                return {
-                    "status": response.status,
-                    "url": response.geturl(),
-                    "text": raw.decode(
-                        charset,
-                        errors="replace"
-                    ),
-                    "content_type": response.headers.get(
-                        "Content-Type",
-                        ""
-                    ),
-                }
-
-        except urllib.error.HTTPError as exc:
-            last_error = exc
-
-            if exc.code not in retryable_codes:
-                raise
-
-        except (
-            urllib.error.URLError,
-            TimeoutError,
-            socket.timeout,
-            ConnectionError,
-            OSError,
-        ) as exc:
-            last_error = exc
-
-        log(
-            f"Échec réseau {attempt}/{MAX_ATTEMPTS} "
-            f"sur {url}: {last_error}"
+    if result:
+        return int(
+            result.group(1)
         )
 
-        if attempt < MAX_ATTEMPTS:
-            time.sleep(
-                min(2 ** attempt, 15)
-            )
+    return None
 
-    raise RuntimeError(
-        f"Connexion impossible : {url} "
-        f"({last_error})"
-    )
-
-
-def fetch(url):
-    return fetch_response(url)["text"]
-
-
-def fetch_json(url):
-    return json.loads(
-        fetch(url)
-    )
-
-
-# ============================================================
-# NORMALISATION URL
-# ============================================================
 
 def normalize_url(value, base=NEWS):
     if not isinstance(value, str):
@@ -444,22 +403,136 @@ def title_from_url(url):
     )
 
 
-def species_id(url):
-    result = re.search(
-        r"/pokemon-species/(\d+)/?$",
-        str(url)
+# ============================================================
+# REQUÊTES RÉSEAU
+# ============================================================
+
+def fetch_response(
+    url,
+    timeout=NEWS_TIMEOUT,
+    attempts=NEWS_ATTEMPTS
+):
+    retry_codes = {
+        408, 429, 500, 502, 503, 504
+    }
+
+    last_error = None
+
+    for attempt in range(
+        1,
+        attempts + 1
+    ):
+        try:
+            request = urllib.request.Request(
+                url,
+                headers=HEADERS
+            )
+
+            with urllib.request.urlopen(
+                request,
+                timeout=timeout
+            ) as response:
+
+                raw = response.read(
+                    8_000_000
+                )
+
+                charset = (
+                    response.headers.get_content_charset()
+                    or "utf-8"
+                )
+
+                return {
+                    "url": response.geturl(),
+                    "status": response.status,
+                    "text": raw.decode(
+                        charset,
+                        errors="replace"
+                    ),
+                }
+
+        except urllib.error.HTTPError as exc:
+            last_error = exc
+
+            # Ne pas insister lorsqu'un serveur
+            # interdit explicitement l'accès.
+            if exc.code in (
+                401, 403, 404
+            ):
+                raise
+
+            if exc.code not in retry_codes:
+                raise
+
+            # 429 : respecter Retry-After lorsqu'il
+            # est présent, sans bloquer indéfiniment.
+            if exc.code == 429:
+                retry_after = (
+                    exc.headers.get(
+                        "Retry-After"
+                    )
+                )
+
+                if retry_after:
+                    try:
+                        wait = min(
+                            int(retry_after),
+                            60
+                        )
+                        time.sleep(wait)
+                    except ValueError:
+                        pass
+
+        except (
+            urllib.error.URLError,
+            TimeoutError,
+            socket.timeout,
+            ConnectionError,
+            OSError
+        ) as exc:
+            last_error = exc
+
+        log(
+            f"Connexion {attempt}/{attempts} "
+            f"échouée : {url} ({last_error})"
+        )
+
+        if attempt < attempts:
+            time.sleep(
+                min(
+                    2 ** attempt,
+                    10
+                )
+            )
+
+    raise RuntimeError(
+        f"Connexion impossible : {url} "
+        f"({last_error})"
     )
 
-    if not result:
-        return None
 
-    return int(
-        result.group(1)
+def fetch_api_json(url):
+    response = fetch_response(
+        url,
+        timeout=API_TIMEOUT,
+        attempts=API_ATTEMPTS
     )
+
+    return json.loads(
+        response["text"]
+    )
+
+
+def fetch_news(url):
+    return fetch_response(
+        url,
+        timeout=NEWS_TIMEOUT,
+        attempts=NEWS_ATTEMPTS
+    )["text"]
 
 
 # ============================================================
-# HTML PARSER V5.5
+# HTML PARSER
 # ============================================================
 
 class PokemonHTMLParser(HTMLParser):
@@ -478,8 +551,8 @@ class PokemonHTMLParser(HTMLParser):
 
         self.title = ""
 
-        self.tag_stack = []
-        self.ignored_depth = 0
+        self.ignored = []
+        self.article_depth = 0
 
         self.current_link = None
         self.link_parts = []
@@ -489,8 +562,6 @@ class PokemonHTMLParser(HTMLParser):
         self.block_depth = 0
         self.block_in_article = False
 
-        self.article_depth = 0
-
         self.script_type = None
         self.script_parts = []
 
@@ -499,8 +570,6 @@ class PokemonHTMLParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
-
-        self.tag_stack.append(tag)
 
         if tag == "meta":
             key = (
@@ -528,10 +597,10 @@ class PokemonHTMLParser(HTMLParser):
             "svg",
             "iframe"
         ):
-            self.ignored_depth += 1
+            self.ignored.append(tag)
             return
 
-        if self.ignored_depth:
+        if self.ignored:
             return
 
         if tag == "title":
@@ -570,7 +639,7 @@ class PokemonHTMLParser(HTMLParser):
             self.script_parts.append(data)
             return
 
-        if self.ignored_depth:
+        if self.ignored:
             return
 
         if self.in_title:
@@ -597,70 +666,62 @@ class PokemonHTMLParser(HTMLParser):
 
             self.script_type = None
             self.script_parts = []
+            return
 
-        elif self.ignored_depth:
-            if tag in (
-                "style",
-                "noscript",
-                "svg",
-                "iframe"
-            ):
-                self.ignored_depth = max(
-                    0,
-                    self.ignored_depth - 1
+        if self.ignored:
+            if tag == self.ignored[-1]:
+                self.ignored.pop()
+            return
+
+        if tag == "title":
+            self.in_title = False
+            self.title = clean(
+                " ".join(
+                    self.title_parts
                 )
+            )
 
-        else:
-            if tag == "title":
-                self.in_title = False
-                self.title = clean(
-                    " ".join(self.title_parts)
-                )
-
-            if tag == "a":
-                if self.current_link:
-                    self.links.append({
-                        "url": self.current_link,
-                        "title": clean(
-                            " ".join(
-                                self.link_parts
-                            )
-                        )
-                    })
-
-                self.current_link = None
-                self.link_parts = []
-
-            if self.current_block is not None:
-                self.block_depth -= 1
-
-                if self.block_depth <= 0:
-                    value = clean(
+        if tag == "a":
+            if self.current_link:
+                self.links.append({
+                    "url": self.current_link,
+                    "title": clean(
                         " ".join(
-                            self.block_parts
+                            self.link_parts
                         )
                     )
+                })
 
-                    if len(value) >= 20:
-                        self.blocks.append(value)
+            self.current_link = None
+            self.link_parts = []
 
-                        if self.block_in_article:
-                            self.article_blocks.append(
-                                value
-                            )
+        if self.current_block is not None:
+            self.block_depth -= 1
 
-                    self.current_block = None
-                    self.block_parts = []
-                    self.block_depth = 0
-
-            if tag == "article":
-                self.article_depth = max(
-                    0,
-                    self.article_depth - 1
+            if self.block_depth <= 0:
+                value = clean(
+                    " ".join(
+                        self.block_parts
+                    )
                 )
 
-        if self.tag_stack:
-            self.tag_stack.pop()
+                if len(value) >= 20:
+                    self.blocks.append(value)
+
+                    if self.block_in_article:
+                        self.article_blocks.append(
+                            value
+                        )
+
+                self.current_block = None
+                self.block_parts = []
+                self.block_depth = 0
+
+        if tag == "article":
+            self.article_depth = max(
+                0,
+                self.article_depth - 1
+            )
 
 
 def parse_html(raw):
@@ -670,7 +731,7 @@ def parse_html(raw):
 
 
 # ============================================================
-# EXTRACTION JSON-LD
+# EXTRACTION DES ARTICLES
 # ============================================================
 
 def walk_json(value):
@@ -682,7 +743,10 @@ def walk_json(value):
         yield value
 
         for child in value.values():
-            if isinstance(child, (dict, list)):
+            if isinstance(
+                child,
+                (dict, list)
+            ):
                 yield from walk_json(child)
 
 
@@ -744,95 +808,25 @@ def extract_jsonld(parser):
     return result
 
 
-# ============================================================
-# EXTRACTION MULTI-MÉTHODES
-# ============================================================
+def detect_antibot(raw):
+    lower = raw.lower()
 
-def extract_embedded_article(raw):
-    """
-    Recherche de contenu dans certaines données
-    JSON intégrées aux pages modernes.
-
-    Ne suppose pas qu'une structure particulière
-    existe toujours.
-    """
-
-    candidates = []
-
-    patterns = [
-        r'"articleBody"\s*:\s*"((?:\\.|[^"\\])*)"',
-        r'"body"\s*:\s*"((?:\\.|[^"\\])*)"',
-        r'"content"\s*:\s*"((?:\\.|[^"\\])*)"',
-    ]
-
-    for pattern in patterns:
-        for match in re.finditer(
-            pattern,
-            raw,
-            flags=re.IGNORECASE
-        ):
-            try:
-                decoded = json.loads(
-                    '"' + match.group(1) + '"'
-                )
-
-                if not isinstance(decoded, str):
-                    continue
-
-                decoded = re.sub(
-                    r"<[^>]+>",
-                    " ",
-                    decoded
-                )
-
-                decoded = clean(decoded)
-
-                if (
-                    MIN_ARTICLE_TEXT
-                    <= len(decoded)
-                    <= 100000
-                ):
-                    candidates.append(decoded)
-
-            except ValueError:
-                continue
-
-    return max(
-        candidates,
-        key=len,
-        default=""
+    return any(
+        pattern in lower
+        for pattern in ANTIBOT_PATTERNS
     )
-
-
-def is_generic_text(text):
-    lower = text.lower()
-
-    indicators = [
-        "enable javascript",
-        "please enable javascript",
-        "cookies are required",
-        "access denied",
-        "verify you are human",
-        "something went wrong",
-        "page not found",
-        "the pokémon company international",
-    ]
-
-    hits = sum(
-        indicator in lower
-        for indicator in indicators
-    )
-
-    if hits >= 2 and len(text) < 1500:
-        return True
-
-    if len(text) < MIN_ARTICLE_TEXT:
-        return True
-
-    return False
 
 
 def extract_article(raw):
+    if detect_antibot(raw):
+        return {
+            "title": "",
+            "published_at": None,
+            "body": "",
+            "method": "blocked",
+            "status": "blocked",
+        }
+
     parser = parse_html(raw)
     structured = extract_jsonld(parser)
 
@@ -850,78 +844,56 @@ def extract_article(raw):
                 "article:published_time"
             )
         )
-        or parse_date(
-            parser.meta.get(
-                "datepublished"
-            )
-        )
     )
 
-    methods = {
-        "jsonld": structured["body"],
-        "article_html": clean(
-            " ".join(
-                parser.article_blocks
+    candidates = [
+        (
+            "jsonld",
+            structured["body"]
+        ),
+        (
+            "article_html",
+            clean(
+                " ".join(
+                    parser.article_blocks
+                )
             )
         ),
-        "embedded_json": extract_embedded_article(
-            raw
-        ),
-        "html_blocks": clean(
-            " ".join(
-                parser.blocks
+        (
+            "html_blocks",
+            clean(
+                " ".join(
+                    parser.blocks
+                )
             )
         ),
-    }
-
-    # Favoriser un vrai article plutôt qu'une
-    # longue navigation ou un pied de page.
-    order = [
-        "jsonld",
-        "article_html",
-        "embedded_json",
-        "html_blocks",
     ]
 
-    body = ""
-    method = "none"
-
-    for candidate_method in order:
-        candidate = methods[candidate_method]
-
-        if (
-            len(candidate) >= MIN_ARTICLE_TEXT
-            and not is_generic_text(candidate)
-        ):
-            body = candidate
-            method = candidate_method
-            break
-
-    if not body:
-        body = max(
-            methods.values(),
-            key=len,
-            default=""
-        )
-
-        method = "fallback"
+    for method, body in candidates:
+        if len(body) >= MIN_ARTICLE_TEXT:
+            return {
+                "title": clean(title),
+                "published_at": published_at,
+                "body": body[:60000],
+                "method": method,
+                "status": "ok",
+            }
 
     return {
         "title": clean(title),
         "published_at": published_at,
-        "body": body[:60000],
-        "method": method,
-        "is_generic": is_generic_text(body),
-        "body_length": len(body),
+        "body": "",
+        "method": "title_only",
+        "status": "title_only",
     }
 
 
 # ============================================================
-# POKEAPI ET CACHE
+# POKEAPI
 # ============================================================
 
 def fetch_pokeapi_catalogue():
-    species_data = fetch_json(
+    species_data = fetch_api_json(
         API + "/pokemon-species?limit=2000"
     )
 
@@ -937,8 +909,8 @@ def fetch_pokeapi_catalogue():
     ]
 
     ids = [
-        number for number in ids
-        if number is not None
+        value for value in ids
+        if value is not None
     ]
 
     if not ids:
@@ -948,14 +920,14 @@ def fetch_pokeapi_catalogue():
 
     max_id = max(ids)
 
-    generation_list = fetch_json(
+    generation_list = fetch_api_json(
         API + "/generation?limit=100"
     ).get("results", [])
 
     ranges = []
 
     for generation in generation_list:
-        details = fetch_json(
+        details = fetch_api_json(
             generation["url"]
         )
 
@@ -982,7 +954,7 @@ def fetch_pokeapi_catalogue():
         time.sleep(REQUEST_DELAY)
 
     ranges.sort(
-        key=lambda item: item[0]
+        key=lambda pair: pair[0]
     )
 
     return {
@@ -1016,7 +988,6 @@ def update_index(catalogue):
         for pair in catalogue["ranges"]
     ]
 
-    # Conserver les trois entrées provisoires.
     if (
         max_id < 1028
         and not any(
@@ -1057,13 +1028,12 @@ def update_index(catalogue):
 
     if max_count != 1:
         raise RuntimeError(
-            "Marqueur MAX introuvable dans index.html"
+            "Marqueur MAX introuvable"
         )
 
     if range_count != 1:
         raise RuntimeError(
-            "Marqueur genRanges introuvable "
-            "dans index.html"
+            "Marqueur genRanges introuvable"
         )
 
     updated = updated.replace(
@@ -1086,13 +1056,13 @@ def update_index(catalogue):
 
 
 def update_pokeapi():
-    log("Connexion à PokéAPI")
+    log("Actualisation PokéAPI")
 
     cache_path = (
         DATA / "pokeapi-cache.json"
     )
 
-    cache = load_json(
+    old_cache = load_json(
         cache_path,
         {}
     ) or {}
@@ -1103,47 +1073,25 @@ def update_pokeapi():
     try:
         catalogue = fetch_pokeapi_catalogue()
 
-        save_json(
-            cache_path,
-            catalogue
-        )
-
     except Exception as exc:
         error = str(exc)
 
-        log(
-            "PokéAPI inaccessible : "
-            + error
-        )
-
         valid_cache = (
             isinstance(
-                cache.get("max_id"),
+                old_cache.get("max_id"),
                 int
             )
             and isinstance(
-                cache.get("ranges"),
+                old_cache.get("ranges"),
                 list
             )
             and isinstance(
-                cache.get("known_names"),
+                old_cache.get("known_names"),
                 list
             )
         )
 
-        if valid_cache:
-            catalogue = cache
-            source = "cache"
-
-            log(
-                "Utilisation du cache PokéAPI"
-            )
-
-        else:
-            log(
-                "Aucun cache valide disponible"
-            )
-
+        if not valid_cache:
             save_json(
                 DATA / "catalogue-status.json",
                 {
@@ -1156,11 +1104,51 @@ def update_pokeapi():
                 }
             )
 
+            log(
+                "PokéAPI inaccessible sans cache"
+            )
+
             return set()
+
+        catalogue = old_cache
+        source = "cache"
+
+        log(
+            "Utilisation du cache PokéAPI"
+        )
+
+    old_names = set(
+        old_cache.get(
+            "known_names", []
+        )
+    )
+
+    new_names = set(
+        catalogue["known_names"]
+    )
+
+    old_max = old_cache.get(
+        "max_id", 0
+    )
+
+    newly_detected = []
+
+    # Ne pas traiter tout le catalogue comme
+    # nouveau lors du premier lancement.
+    if old_names and source == "live":
+        newly_detected = sorted(
+            new_names - old_names
+        )
 
     changed, ranges = update_index(
         catalogue
     )
+
+    if source == "live":
+        save_json(
+            cache_path,
+            catalogue
+        )
 
     save_json(
         DATA / "catalogue-status.json",
@@ -1175,7 +1163,12 @@ def update_pokeapi():
             "pokeapi_max_species_id": (
                 catalogue["max_id"]
             ),
+            "previous_max_species_id": old_max,
             "generation_ranges": ranges,
+            "new_species_count": len(
+                newly_detected
+            ),
+            "new_species_names": newly_detected,
             "index_modified": changed,
             "cache_updated_at": catalogue.get(
                 "updated_at"
@@ -1184,18 +1177,39 @@ def update_pokeapi():
         }
     )
 
-    log(
-        "Espèces PokéAPI : "
-        + str(catalogue["max_id"])
+    save_json(
+        DATA / "nouvelles-especes-officielles.json",
+        {
+            "version": VERSION,
+            "checked_at": utc_now(),
+            "source": source,
+            "previous_max_species_id": old_max,
+            "current_max_species_id": (
+                catalogue["max_id"]
+            ),
+            "new_species_count": len(
+                newly_detected
+            ),
+            "new_species_names": newly_detected,
+            "verified_by_pokeapi": (
+                source == "live"
+            ),
+        }
     )
 
     log(
-        "Source : " + source
+        f"Espèces : {catalogue['max_id']}"
     )
 
-    return set(
-        catalogue["known_names"]
+    log(
+        f"Nouvelles espèces : {len(newly_detected)}"
     )
+
+    log(
+        f"Source : {source}"
+    )
+
+    return new_names
 
 
 # ============================================================
@@ -1203,7 +1217,7 @@ def update_pokeapi():
 # ============================================================
 
 def discover_news_page():
-    raw = fetch(NEWS)
+    raw = fetch_news(NEWS)
     parser = parse_html(raw)
 
     articles = []
@@ -1213,7 +1227,10 @@ def discover_news_page():
             link["url"]
         )
 
-        if not url or not is_article_url(url):
+        if (
+            not url
+            or not is_article_url(url)
+        ):
             continue
 
         articles.append({
@@ -1235,7 +1252,7 @@ def discover_sitemaps():
 
     for sitemap in SITEMAPS:
         try:
-            raw = fetch(sitemap)
+            raw = fetch_news(sitemap)
             root = ET.fromstring(raw)
 
             for node in root.iter():
@@ -1291,7 +1308,7 @@ def discover_sitemaps():
 
 
 # ============================================================
-# CLASSEMENT DES ANNONCES
+# CLASSIFICATION
 # ============================================================
 
 def classify_announcement(title, body=""):
@@ -1315,39 +1332,30 @@ def classify_announcement(title, body=""):
         text
     )
 
-    commercial = matches(
-        LOW_PRIORITY_PATTERNS,
+    excluded = matches(
+        EXCLUSION_PATTERNS,
         title
     )
 
-    if form:
-        category = "new_form_or_mega"
+    if excluded:
+        category = "excluded_news"
+        score = -100
 
     elif species:
         category = "possible_new_species"
+        score = 300
 
     elif gen10:
         category = "generation_10_news"
+        score = 220
+
+    elif form:
+        category = "new_form_or_mega"
+        score = 140
 
     else:
         category = "general_news"
-
-    score = 0
-
-    if species:
-        score += 150
-
-    if gen10:
-        score += 110
-
-    if form:
-        score += 35
-
-    if commercial:
-        score -= 100
-
-    if category == "possible_new_species":
-        score += 50
+        score = 0
 
     return {
         "category": category,
@@ -1355,17 +1363,34 @@ def classify_announcement(title, body=""):
         "species_pattern": species,
         "generation_10_pattern": gen10,
         "form_pattern": form,
-        "commercial_pattern": commercial,
+        "excluded": excluded,
     }
 
 
 def article_score(article):
+    title = article.get(
+        "title", ""
+    )
+
+    body = (
+        article.get(
+            "body_excerpt", ""
+        )
+        if article.get(
+            "inspection_status"
+        ) == "ok"
+        else ""
+    )
+
     result = classify_announcement(
-        article.get("title", ""),
-        article.get("body_excerpt", "")
+        title,
+        body
     )
 
     score = result["priority_score"]
+
+    if score <= 0:
+        return score
 
     date = (
         article.get("published_at")
@@ -1375,25 +1400,16 @@ def article_score(article):
     age = age_days(date)
 
     if age <= 7:
-        score += 90
+        score += 70
 
     elif age <= 30:
-        score += 65
+        score += 45
 
     elif age <= 90:
-        score += 40
-
-    elif age <= 180:
-        score += 15
+        score += 20
 
     elif age > 365:
         score -= 30
-
-    if (
-        article.get("discovery_method")
-        == "html_link"
-    ):
-        score += 20
 
     return score
 
@@ -1411,8 +1427,8 @@ def should_inspect(article):
         days = RECHECK_OK_DAYS
 
     elif status in (
+        "blocked",
         "suspected_generic_content",
-        "insufficient_content",
         "title_only"
     ):
         days = RECHECK_GENERIC_DAYS
@@ -1426,7 +1442,7 @@ def should_inspect(article):
 
 
 # ============================================================
-# EXTRACTION DES NOMS POTENTIELS
+# DÉTECTION DES NOMS
 # ============================================================
 
 def extract_evidence(text):
@@ -1445,27 +1461,7 @@ def extract_evidence(text):
     ][:12]
 
 
-def known_mentions(text, known_names):
-    words = set(
-        re.findall(
-            r"[a-z][a-z'-]+",
-            text.lower()
-        )
-    )
-
-    return sorted(
-        words & known_names
-    )[:80]
-
-
 def candidate_names(text, known_names):
-    """
-    Extraction prudente de noms propres.
-
-    Ces résultats ne sont jamais considérés
-    automatiquement comme de nouveaux Pokémon.
-    """
-
     names = re.findall(
         r"\b[A-Z][a-z]{3,}"
         r"(?:[-'][A-Z]?[a-z]+)?\b",
@@ -1484,9 +1480,6 @@ def candidate_names(text, known_names):
             continue
 
         if lower in MANUAL_POKEMON:
-            continue
-
-        if len(name) > 24:
             continue
 
         if name not in candidates:
@@ -1510,12 +1503,12 @@ def inspect_article(article, known_names):
     result["name_candidates_for_review"] = []
 
     try:
-        response = fetch_response(
+        raw = fetch_news(
             article["url"]
         )
 
         extracted = extract_article(
-            response["text"]
+            raw
         )
 
         if extracted["title"]:
@@ -1528,56 +1521,48 @@ def inspect_article(article, known_names):
                 extracted["published_at"]
             )
 
+        result["extraction_method"] = (
+            extracted["method"]
+        )
+
+        result["inspection_status"] = (
+            extracted["status"]
+        )
+
         body = extracted["body"]
 
         result["extracted_text_length"] = (
             len(body)
         )
 
-        result["extraction_method"] = (
-            extracted["method"]
-        )
-
         result["content_fingerprint"] = (
             fingerprint(body)
+            if body
+            else None
         )
 
         result["body_excerpt"] = (
             body[:1200]
         )
 
-        if extracted["is_generic"]:
-            result["inspection_status"] = (
-                "title_only"
-            )
+        result["title_signal_only"] = (
+            extracted["status"] != "ok"
+        )
 
-            result["extraction_warning"] = (
-                "Contenu générique ou incomplet. "
-                "Analyse limitée au titre officiel."
-            )
-
-            text = result["title"]
-
-        else:
-            result["inspection_status"] = "ok"
-
-            text = (
-                result["title"]
-                + ". "
-                + body
-            )
+        text = (
+            result["title"]
+            if extracted["status"] != "ok"
+            else result["title"] + ". " + body
+        )
 
         classification = classify_announcement(
             result["title"],
-            "" if extracted["is_generic"] else body
+            body if extracted["status"] == "ok"
+            else ""
         )
 
         result["announcement_category"] = (
             classification["category"]
-        )
-
-        result["title_signal_only"] = (
-            extracted["is_generic"]
         )
 
         evidence = extract_evidence(
@@ -1588,16 +1573,10 @@ def inspect_article(article, known_names):
             evidence
         )
 
-        result["known_pokemon_mentions"] = (
-            known_mentions(
-                text,
-                known_names
-            )
-        )
-
         if (
             classification["category"]
             == "possible_new_species"
+            and extracted["status"] == "ok"
         ):
             result["name_candidates_for_review"] = (
                 candidate_names(
@@ -1606,6 +1585,17 @@ def inspect_article(article, known_names):
                 )
             )
 
+    except urllib.error.HTTPError as exc:
+        result["inspection_status"] = (
+            "blocked"
+            if exc.code in (401, 403, 429)
+            else "error"
+        )
+
+        result["inspection_error"] = (
+            f"HTTP {exc.code}"
+        )
+
     except Exception as exc:
         result["inspection_status"] = "error"
         result["inspection_error"] = (
@@ -1613,69 +1603,6 @@ def inspect_article(article, known_names):
         )
 
     return result
-
-
-# ============================================================
-# DÉTECTION DES CONTENUS GÉNÉRIQUES
-# ============================================================
-
-def mark_duplicate_generic_pages(history):
-    fingerprints = {}
-
-    for url, article in history.items():
-        fp = article.get(
-            "content_fingerprint"
-        )
-
-        if fp:
-            fingerprints.setdefault(
-                fp, []
-            ).append(url)
-
-    count = 0
-
-    for urls in fingerprints.values():
-        if (
-            len(urls)
-            < GENERIC_FINGERPRINT_THRESHOLD
-        ):
-            continue
-
-        for url in urls:
-            article = history[url]
-
-            if article.get(
-                "inspection_status"
-            ) not in (
-                "ok",
-                "title_only",
-                "suspected_generic_content"
-            ):
-                continue
-
-            article["inspection_status"] = (
-                "suspected_generic_content"
-            )
-
-            article["title_signal_only"] = True
-
-            article["extraction_warning"] = (
-                "Même contenu extrait sur plusieurs "
-                "articles différents. Le titre "
-                "reste utilisable comme indice."
-            )
-
-            article["announcement_evidence"] = (
-                extract_evidence(
-                    article.get("title", "")
-                )
-            )
-
-            article["name_candidates_for_review"] = []
-
-            count += 1
-
-    return count
 
 
 # ============================================================
@@ -1736,8 +1663,51 @@ def merge_discovered(history, discovered):
     return new_count
 
 
+def mark_duplicate_generic_pages(history):
+    fingerprints = {}
+
+    for url, article in history.items():
+        fp = article.get(
+            "content_fingerprint"
+        )
+
+        if fp:
+            fingerprints.setdefault(
+                fp, []
+            ).append(url)
+
+    count = 0
+
+    for urls in fingerprints.values():
+        if len(urls) < GENERIC_FINGERPRINT_THRESHOLD:
+            continue
+
+        for url in urls:
+            article = history[url]
+
+            if article.get(
+                "inspection_status"
+            ) not in (
+                "ok",
+                "title_only",
+                "suspected_generic_content"
+            ):
+                continue
+
+            article["inspection_status"] = (
+                "suspected_generic_content"
+            )
+
+            article["title_signal_only"] = True
+            article["name_candidates_for_review"] = []
+
+            count += 1
+
+    return count
+
+
 # ============================================================
-# RAPPORTS DE SURVEILLANCE
+# RAPPORTS
 # ============================================================
 
 def build_candidates(history):
@@ -1804,7 +1774,7 @@ def build_priority(history):
         reverse=True
     )
 
-    results = []
+    priority = []
 
     for article in ordered:
         score = article_score(
@@ -1825,7 +1795,7 @@ def build_priority(history):
             else ""
         )
 
-        results.append({
+        priority.append({
             "title": article.get(
                 "title", ""
             ),
@@ -1848,7 +1818,7 @@ def build_priority(history):
             ),
             "title_signal_only": article.get(
                 "title_signal_only",
-                False
+                True
             ),
             "announcement_evidence": article.get(
                 "announcement_evidence",
@@ -1863,23 +1833,22 @@ def build_priority(history):
             "verified_new_species": False,
         })
 
-        if len(results) >= MAX_PRIORITY_ARTICLES:
+        if len(priority) >= MAX_PRIORITY_ARTICLES:
             break
 
-    return results, ordered
+    return priority, ordered
 
 
 # ============================================================
-# SURVEILLANCE PRINCIPALE
+# ACTUALITÉS
 # ============================================================
 
 def update_news(known_names):
     log(
-        "Surveillance des actualités officielles"
+        "Surveillance des annonces officielles"
     )
 
     history = load_history()
-
     errors = []
 
     try:
@@ -1932,8 +1901,6 @@ def update_news(known_names):
         discovered
     )
 
-    # Priorité aux articles nouveaux, récents,
-    # et aux annonces de génération 10.
     pending = []
 
     for url, article in history.items():
@@ -1965,6 +1932,7 @@ def update_news(known_names):
     )
 
     inspected = 0
+    blocked = 0
 
     for _, _, url in pending[
         :MAX_ARTICLES_PER_RUN
@@ -1975,6 +1943,11 @@ def update_news(known_names):
         )
 
         inspected += 1
+
+        if history[url].get(
+            "inspection_status"
+        ) == "blocked":
+            blocked += 1
 
         time.sleep(
             REQUEST_DELAY
@@ -2036,6 +2009,7 @@ def update_news(known_names):
         ),
         "first_seen_urls": new_count,
         "articles_inspected_this_run": inspected,
+        "blocked_articles_this_run": blocked,
         "history_entries": len(
             history
         ),
@@ -2086,7 +2060,7 @@ def update_news(known_names):
             "notice": (
                 "Noms potentiels seulement. "
                 "Vérification officielle requise "
-                "avant tout ajout au Pokédex."
+                "avant ajout au Pokédex."
             ),
         }
     )
@@ -2114,6 +2088,7 @@ def update_news(known_names):
             ),
             "first_seen_urls": new_count,
             "articles_inspected": inspected,
+            "blocked_articles": blocked,
             "candidate_count": len(
                 candidates
             ),
@@ -2143,7 +2118,7 @@ def update_news(known_names):
     )
 
     log(
-        f"Contenus génériques : {generic_count}"
+        f"Articles bloqués : {blocked}"
     )
 
     log(
@@ -2160,7 +2135,7 @@ def update_news(known_names):
 
 
 # ============================================================
-# MAIN
+# PROGRAMME PRINCIPAL
 # ============================================================
 
 def main():
@@ -2170,8 +2145,8 @@ def main():
     )
 
     log("======================================")
-    log("POKEDEX ACETIQUE V5.5")
-    log("SURVEILLANCE OFFICIELLE AMÉLIORÉE")
+    log("POKEDEX ACETIQUE V5.6")
+    log("SURVEILLANCE NOUVELLES ESPÈCES")
     log("======================================")
 
     known_names = update_pokeapi()
