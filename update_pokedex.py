@@ -3,21 +3,29 @@
 # -*- coding: utf-8 -*-
 
 """
-POKEDEX ACETIQUE V5.4.1
-Mise à jour automatique et surveillance officielle.
+POKEDEX ACETIQUE V5.5
+=====================
 
-Python 3.12 — bibliothèque standard uniquement.
+Mise à jour du Pokédex et surveillance des annonces
+officielles de nouveaux Pokémon.
 
-Améliorations :
-- Connexion avec 5 tentatives et délai de 60 secondes
-- Cache local de PokéAPI
-- Préservation du site en cas de panne réseau
-- Surveillance des annonces officielles
-- Priorité aux annonces de nouvelles espèces
-- Exclusion des annonces commerciales non pertinentes
-- Détection des contenus génériques
-- Historique permanent des actualités
-- Aucun ajout automatique d'espèce non vérifiée
+Python 3.11+.
+Bibliothèque standard uniquement.
+Aucune clé API payante.
+
+Fonctions :
+- PokéAPI avec retentatives et cache local
+- Actualisation des générations dans index.html
+- Préservation des Pokémon provisoires de génération 10
+- Découverte des articles officiels Pokémon
+- Extraction HTML, JSON-LD et données structurées
+- Détection des pages génériques
+- Analyse de secours à partir des titres officiels
+- Classement prioritaire des annonces de nouveaux Pokémon
+- Distinction espèces, formes et Méga-Évolutions
+- Historique permanent
+- Aucun ajout automatique d'espèce non confirmée
+- Rapports JSON compatibles avec la V5.4.1
 """
 
 import datetime as dt
@@ -35,7 +43,11 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 
-VERSION = "5.4.1"
+# ============================================================
+# CONFIGURATION
+# ============================================================
+
+VERSION = "5.5"
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -45,87 +57,120 @@ SITE = "https://www.pokemon.com"
 NEWS = SITE + "/us/pokemon-news"
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; AcetiquePokedex/5.4.1)",
-    "Accept": "text/html,application/json,application/xml,*/*",
+    "User-Agent": (
+        "Mozilla/5.0 "
+        "(X11; Linux x86_64) "
+        "AppleWebKit/537.36 "
+        "(KHTML, like Gecko) "
+        "Chrome/120.0 Safari/537.36"
+    ),
+    "Accept": (
+        "text/html,application/xhtml+xml,"
+        "application/json,application/xml,*/*"
+    ),
     "Accept-Language": "en-US,en;q=0.9",
 }
 
-TIMEOUT = 60
-MAX_ATTEMPTS = 5
-MAX_INSPECTIONS = 35
-MAX_VISIBLE = 100
-MAX_PRIORITY = 50
-MAX_HISTORY = 10000
-MIN_TEXT = 150
+REQUEST_TIMEOUT = 35
+MAX_ATTEMPTS = 4
+REQUEST_DELAY = 0.30
+
+MAX_ARTICLES_PER_RUN = 35
+MAX_VISIBLE_ARTICLES = 100
+MAX_PRIORITY_ARTICLES = 60
+MAX_HISTORY_ARTICLES = 10000
+
+MIN_ARTICLE_TEXT = 180
+GENERIC_FINGERPRINT_THRESHOLD = 3
+
+# Ne pas réinspecter quotidiennement les anciennes pages
+RECHECK_OK_DAYS = 30
+RECHECK_GENERIC_DAYS = 14
+RECHECK_ERROR_DAYS = 3
 
 SITEMAPS = [
     SITE + "/sitemap.xml",
     SITE + "/us/news/sitemap.xml",
 ]
 
-STRONG = [
-    r"\bnewly discovered pok[eé]mon\b",
-    r"\bnew species of pok[eé]mon\b",
-    r"\bnew pok[eé]mon (?:revealed|unveiled|discovered)\b",
-    r"\bmeet (?:the )?new pok[eé]mon\b",
-    r"\bintroducing (?:a |the )?new pok[eé]mon\b",
-    r"\bnever.before.seen pok[eé]mon\b",
-    r"\bnouvelle esp[eè]ce de pok[eé]mon\b",
-]
-
-INTEREST = [
-    r"\bgen(?:eration)?\s*10\b",
-    r"\bnew region\b",
-    r"\bnew starters?\b",
-    r"\bstarter pok[eé]mon\b",
-    r"\bnew pok[eé]mon\b",
-    r"\bpok[eé]mon presents\b",
-    r"\bnouvelle g[eé]n[eé]ration\b",
-]
-
-COMMERCIAL = [
-    r"\btcg\b",
-    r"\btrading card\b",
-    r"\bpromo cards?\b",
-    r"\bplush\b",
-    r"\bmerchandise\b",
-    r"\bpok[eé]mon center\b",
-    r"\baccessories\b",
-    r"\bproduct showcase\b",
-    r"\bpinball\b",
-    r"\bfashion\b",
-]
-
-EXCLUDED = set("""
-pokemon pokémon new newly discovered revealed unveiled
-meet introducing official the and from with this these
-those your their species generation region starter
-starters game games news update updates center trading
-card cards mega evolution legends scarlet violet
-champions pokopia nintendo switch youtube netflix
-world today coming learn more details february january
-march april may june july august september october
-november december presents quality life improvements
-powerful iconic expansion battle battles available
-celebrate global challenge museum series season home
-event events
-""".split())
-
-MANUAL = {
-    "browt", "pombon", "gecqua",
-    "broussatif", "caloulou", "ogéko",
+# Entrées provisoires déjà prévues dans le site.
+MANUAL_POKEMON = {
+    "browt",
+    "pombon",
+    "gecqua",
 }
 
+# Indices forts d'une nouvelle espèce.
+SPECIES_PATTERNS = [
+    r"\bnewly discovered pok[eé]mon\b",
+    r"\bnew pok[eé]mon species\b",
+    r"\bnew species of pok[eé]mon\b",
+    r"\bbrand.new pok[eé]mon\b",
+    r"\bnever.before.seen pok[eé]mon\b",
+    r"\bnew pok[eé]mon (?:revealed|unveiled)\b",
+    r"\bmeet (?:the )?new pok[eé]mon\b",
+    r"\bintroducing (?:a |the )?new pok[eé]mon\b",
+    r"\bthree new partner pok[eé]mon\b",
+]
+
+# Indices généraux de génération 10.
+GEN10_PATTERNS = [
+    r"\bpok[eé]mon winds\b",
+    r"\bpok[eé]mon waves\b",
+    r"\bgeneration 10\b",
+    r"\bgen 10\b",
+    r"\bnew starter pok[eé]mon\b",
+    r"\bnew first.partner pok[eé]mon\b",
+    r"\bnew region\b",
+    r"\bnew pok[eé]mon game\b",
+]
+
+# Les formes ne sont pas des espèces supplémentaires.
+FORM_PATTERNS = [
+    r"\bmega.evol(?:ved|ution)\b",
+    r"\bmega [a-z][a-z-]+\b",
+    r"\bgigantamax\b",
+    r"\bdynamax\b",
+    r"\bregional form\b",
+    r"\bnew form of\b",
+    r"\bprimal reversion\b",
+    r"\bterastal\b",
+]
+
+LOW_PRIORITY_PATTERNS = [
+    r"\btrading card\b",
+    r"\btcg\b",
+    r"\bmerchandise\b",
+    r"\bplush\b",
+    r"\bpok[eé]mon center\b",
+    r"\bchampionship\b",
+    r"\btournament\b",
+    r"\bcommunity day\b",
+    r"\bpok[eé]mon go\b",
+    r"\bnetflix\b",
+    r"\bsoundtrack\b",
+    r"\bspotify\b",
+]
+
+STOPWORDS = set("""
+a about after all also an and are as at available
+be been before by can coming day discover discovered
+edition for from game games get has have here how
+in into is it its latest learn legends more most
+new news next now of official on or our out
+pokemon pokémon presents region reveal revealed
+see season show showing soon special starter starters
+the their these this three to trailer two update
+updates version watch what when where which with
+world worlds you your introducing meet first partner
+nintendo switch mega evolution evolved generation
+winds waves
+""".split())
+
 
 # ============================================================
-# OUTILS
+# FICHIERS ET JOURNAL
 # ============================================================
-
-def now():
-    return dt.datetime.now(
-        dt.timezone.utc
-    ).isoformat()
-
 
 def log(message):
     print(
@@ -134,8 +179,17 @@ def log(message):
     )
 
 
+def utc_now():
+    return dt.datetime.now(
+        dt.timezone.utc
+    ).isoformat()
+
+
 def save_json(path, value):
-    path.parent.mkdir(parents=True, exist_ok=True)
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True
+    )
 
     content = json.dumps(
         value,
@@ -143,22 +197,31 @@ def save_json(path, value):
         indent=2
     ) + "\n"
 
-    if not path.exists() or path.read_text(
-        encoding="utf-8"
-    ) != content:
-        path.write_text(content, encoding="utf-8")
+    if (
+        not path.exists()
+        or path.read_text(encoding="utf-8") != content
+    ):
+        path.write_text(
+            content,
+            encoding="utf-8"
+        )
 
 
 def load_json(path, default=None):
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+        return json.loads(
+            path.read_text(encoding="utf-8")
+        )
+    except (OSError, ValueError, TypeError):
         return default
 
 
 def clean(value):
+    if value is None:
+        return ""
+
     return " ".join(
-        html.unescape(str(value or "")).split()
+        html.unescape(str(value)).split()
     )
 
 
@@ -167,11 +230,12 @@ def parse_date(value):
         return None
 
     try:
-        value = str(value).strip().replace(
-            "Z", "+00:00"
-        )
+        raw = str(value).strip()
 
-        parsed = dt.datetime.fromisoformat(value)
+        if raw.endswith("Z"):
+            raw = raw[:-1] + "+00:00"
+
+        parsed = dt.datetime.fromisoformat(raw)
 
         if parsed.tzinfo is None:
             parsed = parsed.replace(
@@ -182,49 +246,70 @@ def parse_date(value):
             dt.timezone.utc
         ).isoformat()
 
-    except (TypeError, ValueError):
+    except (ValueError, TypeError):
         return None
 
 
-def timestamp(value):
-    value = parse_date(value)
-
-    if not value:
-        return 0
-
-    return dt.datetime.fromisoformat(
-        value
-    ).timestamp()
-
-
 def age_days(value):
-    if not parse_date(value):
+    parsed = parse_date(value)
+
+    if not parsed:
         return 999999
+
+    date = dt.datetime.fromisoformat(parsed)
 
     return max(
         0,
         (
-            dt.datetime.now(dt.timezone.utc)
-            - dt.datetime.fromisoformat(parse_date(value))
+            dt.datetime.now(dt.timezone.utc) - date
         ).total_seconds() / 86400
     )
 
 
+def date_timestamp(value):
+    parsed = parse_date(value)
+
+    if not parsed:
+        return 0
+
+    return dt.datetime.fromisoformat(
+        parsed
+    ).timestamp()
+
+
+def fingerprint(value):
+    return hashlib.sha256(
+        value.encode("utf-8")
+    ).hexdigest()[:16]
+
+
+def matches(patterns, value):
+    return any(
+        re.search(
+            pattern,
+            value,
+            flags=re.IGNORECASE
+        )
+        for pattern in patterns
+    )
+
+
 # ============================================================
-# CONNEXION RÉSEAU AVEC RETENTATIVES
+# CONNEXION RÉSEAU
 # ============================================================
 
 def fetch_response(url):
-    retryable_http = {
+    retryable_codes = {
         408, 429, 500, 502, 503, 504
     }
 
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        try:
-            log(
-                f"Connexion {attempt}/{MAX_ATTEMPTS} : {url}"
-            )
+    last_error = None
 
+    for attempt in range(
+        1,
+        MAX_ATTEMPTS + 1
+    ):
+        try:
             request = urllib.request.Request(
                 url,
                 headers=HEADERS
@@ -232,9 +317,12 @@ def fetch_response(url):
 
             with urllib.request.urlopen(
                 request,
-                timeout=TIMEOUT
+                timeout=REQUEST_TIMEOUT
             ) as response:
-                raw = response.read(8_000_000)
+
+                raw = response.read(
+                    8_000_000
+                )
 
                 charset = (
                     response.headers.get_content_charset()
@@ -243,47 +331,46 @@ def fetch_response(url):
 
                 return {
                     "status": response.status,
+                    "url": response.geturl(),
                     "text": raw.decode(
                         charset,
                         errors="replace"
                     ),
                     "content_type": response.headers.get(
-                        "Content-Type", ""
+                        "Content-Type",
+                        ""
                     ),
-                    "final_url": response.geturl(),
                 }
 
         except urllib.error.HTTPError as exc:
-            if exc.code not in retryable_http:
+            last_error = exc
+
+            if exc.code not in retryable_codes:
                 raise
 
-            error = exc
-
         except (
+            urllib.error.URLError,
             TimeoutError,
             socket.timeout,
-            urllib.error.URLError,
             ConnectionError,
+            OSError,
         ) as exc:
-            error = exc
+            last_error = exc
 
         log(
-            f"Échec tentative {attempt} : {error}"
+            f"Échec réseau {attempt}/{MAX_ATTEMPTS} "
+            f"sur {url}: {last_error}"
         )
 
-        if attempt == MAX_ATTEMPTS:
-            raise RuntimeError(
-                f"Connexion impossible après "
-                f"{MAX_ATTEMPTS} tentatives : {url}"
-            ) from error
+        if attempt < MAX_ATTEMPTS:
+            time.sleep(
+                min(2 ** attempt, 15)
+            )
 
-        wait = min(2 ** attempt, 30)
-
-        log(
-            f"Nouvelle tentative dans {wait} secondes"
-        )
-
-        time.sleep(wait)
+    raise RuntimeError(
+        f"Connexion impossible : {url} "
+        f"({last_error})"
+    )
 
 
 def fetch(url):
@@ -291,40 +378,57 @@ def fetch(url):
 
 
 def fetch_json(url):
-    return json.loads(fetch(url))
+    return json.loads(
+        fetch(url)
+    )
 
 
 # ============================================================
-# URL ET IDENTIFIANTS
+# NORMALISATION URL
 # ============================================================
 
 def normalize_url(value, base=NEWS):
     if not isinstance(value, str):
         return None
 
-    parsed = urllib.parse.urlparse(
-        urllib.parse.urljoin(base, value)
-    )
+    try:
+        joined = urllib.parse.urljoin(
+            base,
+            value
+        )
 
-    if parsed.scheme not in ("http", "https"):
+        parsed = urllib.parse.urlparse(
+            joined
+        )
+
+        if parsed.scheme not in (
+            "http", "https"
+        ):
+            return None
+
+        if parsed.hostname not in (
+            "pokemon.com",
+            "www.pokemon.com"
+        ):
+            return None
+
+        return urllib.parse.urlunparse((
+            "https",
+            "www.pokemon.com",
+            parsed.path.rstrip("/"),
+            "",
+            "",
+            ""
+        ))
+
+    except ValueError:
         return None
 
-    if parsed.hostname not in (
-        "pokemon.com",
-        "www.pokemon.com"
-    ):
-        return None
 
-    return urllib.parse.urlunparse((
-        "https",
-        "www.pokemon.com",
-        parsed.path.rstrip("/"),
-        "", "", ""
-    ))
-
-
-def is_article(url):
-    path = urllib.parse.urlparse(url).path.lower()
+def is_article_url(url):
+    path = urllib.parse.urlparse(
+        url
+    ).path.lower()
 
     return (
         path.startswith("/us/news/")
@@ -333,49 +437,70 @@ def is_article(url):
 
 
 def title_from_url(url):
+    slug = url.rstrip("/").split("/")[-1]
+
     return clean(
-        url.rsplit("/", 1)[-1]
-        .replace("-", " ")
-        .title()
+        slug.replace("-", " ").title()
     )
 
 
 def species_id(url):
-    match = re.search(
+    result = re.search(
         r"/pokemon-species/(\d+)/?$",
-        url
+        str(url)
     )
 
-    return int(match.group(1)) if match else None
+    if not result:
+        return None
+
+    return int(
+        result.group(1)
+    )
 
 
 # ============================================================
-# ANALYSE HTML
+# HTML PARSER V5.5
 # ============================================================
 
-class ArticleParser(HTMLParser):
+class PokemonHTMLParser(HTMLParser):
 
     def __init__(self):
-        super().__init__(convert_charrefs=True)
+        super().__init__(
+            convert_charrefs=True
+        )
 
         self.links = []
         self.meta = {}
         self.jsonld = []
-        self.paragraphs = []
 
-        self.href = None
+        self.blocks = []
+        self.article_blocks = []
+
+        self.title = ""
+
+        self.tag_stack = []
+        self.ignored_depth = 0
+
+        self.current_link = None
         self.link_parts = []
 
-        self.text_depth = 0
-        self.text_parts = []
+        self.current_block = None
+        self.block_parts = []
+        self.block_depth = 0
+        self.block_in_article = False
+
+        self.article_depth = 0
 
         self.script_type = None
         self.script_parts = []
 
-        self.ignored = []
+        self.in_title = False
+        self.title_parts = []
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
+
+        self.tag_stack.append(tag)
 
         if tag == "meta":
             key = (
@@ -385,48 +510,77 @@ class ArticleParser(HTMLParser):
             ).lower()
 
             if key:
-                self.meta[key] = attrs.get("content", "")
+                self.meta[key] = (
+                    attrs.get("content") or ""
+                )
 
         if tag == "script":
-            self.script_type = attrs.get(
-                "type", ""
+            self.script_type = (
+                attrs.get("type") or ""
             ).lower()
+
             self.script_parts = []
             return
 
-        if tag in ("style", "noscript", "svg"):
-            self.ignored.append(tag)
+        if tag in (
+            "style",
+            "noscript",
+            "svg",
+            "iframe"
+        ):
+            self.ignored_depth += 1
             return
 
-        if self.ignored:
+        if self.ignored_depth:
             return
+
+        if tag == "title":
+            self.in_title = True
+            self.title_parts = []
+
+        if tag == "article":
+            self.article_depth += 1
 
         if tag == "a":
-            self.href = attrs.get("href")
+            self.current_link = attrs.get(
+                "href"
+            )
             self.link_parts = []
 
-        if tag in ("p", "h1", "h2", "h3"):
-            if self.text_depth == 0:
-                self.text_parts = []
+        if tag in (
+            "p", "h1", "h2",
+            "h3", "h4", "li"
+        ):
+            if self.current_block is None:
+                self.current_block = tag
+                self.block_parts = []
+                self.block_depth = 1
+                self.block_in_article = (
+                    self.article_depth > 0
+                )
 
-            self.text_depth += 1
+            else:
+                self.block_depth += 1
 
-        elif self.text_depth > 0:
-            self.text_depth += 1
+        elif self.current_block is not None:
+            self.block_depth += 1
 
     def handle_data(self, data):
         if self.script_type is not None:
             self.script_parts.append(data)
             return
 
-        if self.ignored:
+        if self.ignored_depth:
             return
 
-        if self.href is not None:
+        if self.in_title:
+            self.title_parts.append(data)
+
+        if self.current_link is not None:
             self.link_parts.append(data)
 
-        if self.text_depth > 0:
-            self.text_parts.append(data)
+        if self.current_block is not None:
+            self.block_parts.append(data)
 
     def handle_endtag(self, tag):
         if tag == "script":
@@ -434,55 +588,90 @@ class ArticleParser(HTMLParser):
                 self.script_type is not None
                 and "ld+json" in self.script_type
             ):
-                raw = "".join(
+                value = "".join(
                     self.script_parts
                 ).strip()
 
-                if raw:
-                    self.jsonld.append(raw)
+                if value:
+                    self.jsonld.append(value)
 
             self.script_type = None
             self.script_parts = []
-            return
 
-        if self.ignored and self.ignored[-1] == tag:
-            self.ignored.pop()
-            return
-
-        if self.ignored:
-            return
-
-        if tag == "a":
-            if self.href:
-                self.links.append({
-                    "url": self.href,
-                    "title": clean(
-                        " ".join(self.link_parts)
-                    )
-                })
-
-            self.href = None
-            self.link_parts = []
-
-        if self.text_depth > 0:
-            self.text_depth -= 1
-
-            if self.text_depth == 0:
-                value = clean(
-                    " ".join(self.text_parts)
+        elif self.ignored_depth:
+            if tag in (
+                "style",
+                "noscript",
+                "svg",
+                "iframe"
+            ):
+                self.ignored_depth = max(
+                    0,
+                    self.ignored_depth - 1
                 )
 
-                if len(value) >= 12:
-                    self.paragraphs.append(value)
+        else:
+            if tag == "title":
+                self.in_title = False
+                self.title = clean(
+                    " ".join(self.title_parts)
+                )
 
-                self.text_parts = []
+            if tag == "a":
+                if self.current_link:
+                    self.links.append({
+                        "url": self.current_link,
+                        "title": clean(
+                            " ".join(
+                                self.link_parts
+                            )
+                        )
+                    })
+
+                self.current_link = None
+                self.link_parts = []
+
+            if self.current_block is not None:
+                self.block_depth -= 1
+
+                if self.block_depth <= 0:
+                    value = clean(
+                        " ".join(
+                            self.block_parts
+                        )
+                    )
+
+                    if len(value) >= 20:
+                        self.blocks.append(value)
+
+                        if self.block_in_article:
+                            self.article_blocks.append(
+                                value
+                            )
+
+                    self.current_block = None
+                    self.block_parts = []
+                    self.block_depth = 0
+
+            if tag == "article":
+                self.article_depth = max(
+                    0,
+                    self.article_depth - 1
+                )
+
+        if self.tag_stack:
+            self.tag_stack.pop()
 
 
 def parse_html(raw):
-    parser = ArticleParser()
+    parser = PokemonHTMLParser()
     parser.feed(raw)
     return parser
 
+
+# ============================================================
+# EXTRACTION JSON-LD
+# ============================================================
 
 def walk_json(value):
     if isinstance(value, list):
@@ -497,27 +686,12 @@ def walk_json(value):
                 yield from walk_json(child)
 
 
-def metadata(parser):
-    title = (
-        parser.meta.get("og:title")
-        or parser.meta.get("twitter:title")
-    )
-
-    publication = None
-    body = ""
-
-    for key in (
-        "article:published_time",
-        "datepublished",
-        "pubdate",
-        "date",
-    ):
-        publication = parse_date(
-            parser.meta.get(key)
-        )
-
-        if publication:
-            break
+def extract_jsonld(parser):
+    result = {
+        "title": None,
+        "published_at": None,
+        "body": "",
+    }
 
     for raw in parser.jsonld:
         try:
@@ -525,176 +699,338 @@ def metadata(parser):
         except ValueError:
             continue
 
-        for obj in walk_json(root):
-            kinds = obj.get("@type", [])
+        for item in walk_json(root):
+            kind = item.get(
+                "@type", []
+            )
 
-            if not isinstance(kinds, list):
-                kinds = [kinds]
+            if not isinstance(kind, list):
+                kind = [kind]
 
             if not any(
-                kind in (
-                    "Article",
-                    "NewsArticle",
-                    "BlogPosting"
+                str(value).lower() in (
+                    "article",
+                    "newsarticle",
+                    "blogposting"
                 )
-                for kind in kinds
+                for value in kind
             ):
                 continue
 
-            title = obj.get("headline") or title
+            if item.get("headline"):
+                result["title"] = clean(
+                    item["headline"]
+                )
 
-            publication = (
-                parse_date(obj.get("datePublished"))
-                or publication
+            if item.get("datePublished"):
+                result["published_at"] = (
+                    parse_date(
+                        item["datePublished"]
+                    )
+                )
+
+            body = item.get(
+                "articleBody"
             )
 
-            candidate = obj.get("articleBody")
+            if isinstance(body, str):
+                body = clean(body)
 
-            if isinstance(candidate, str):
-                if len(candidate) > len(body):
-                    body = candidate
+                if len(body) > len(
+                    result["body"]
+                ):
+                    result["body"] = body
+
+    return result
+
+
+# ============================================================
+# EXTRACTION MULTI-MÉTHODES
+# ============================================================
+
+def extract_embedded_article(raw):
+    """
+    Recherche de contenu dans certaines données
+    JSON intégrées aux pages modernes.
+
+    Ne suppose pas qu'une structure particulière
+    existe toujours.
+    """
+
+    candidates = []
+
+    patterns = [
+        r'"articleBody"\s*:\s*"((?:\\.|[^"\\])*)"',
+        r'"body"\s*:\s*"((?:\\.|[^"\\])*)"',
+        r'"content"\s*:\s*"((?:\\.|[^"\\])*)"',
+    ]
+
+    for pattern in patterns:
+        for match in re.finditer(
+            pattern,
+            raw,
+            flags=re.IGNORECASE
+        ):
+            try:
+                decoded = json.loads(
+                    '"' + match.group(1) + '"'
+                )
+
+                if not isinstance(decoded, str):
+                    continue
+
+                decoded = re.sub(
+                    r"<[^>]+>",
+                    " ",
+                    decoded
+                )
+
+                decoded = clean(decoded)
+
+                if (
+                    MIN_ARTICLE_TEXT
+                    <= len(decoded)
+                    <= 100000
+                ):
+                    candidates.append(decoded)
+
+            except ValueError:
+                continue
+
+    return max(
+        candidates,
+        key=len,
+        default=""
+    )
+
+
+def is_generic_text(text):
+    lower = text.lower()
+
+    indicators = [
+        "enable javascript",
+        "please enable javascript",
+        "cookies are required",
+        "access denied",
+        "verify you are human",
+        "something went wrong",
+        "page not found",
+        "the pokémon company international",
+    ]
+
+    hits = sum(
+        indicator in lower
+        for indicator in indicators
+    )
+
+    if hits >= 2 and len(text) < 1500:
+        return True
+
+    if len(text) < MIN_ARTICLE_TEXT:
+        return True
+
+    return False
+
+
+def extract_article(raw):
+    parser = parse_html(raw)
+    structured = extract_jsonld(parser)
+
+    title = (
+        structured["title"]
+        or parser.meta.get("og:title")
+        or parser.meta.get("twitter:title")
+        or parser.title
+    )
+
+    published_at = (
+        structured["published_at"]
+        or parse_date(
+            parser.meta.get(
+                "article:published_time"
+            )
+        )
+        or parse_date(
+            parser.meta.get(
+                "datepublished"
+            )
+        )
+    )
+
+    methods = {
+        "jsonld": structured["body"],
+        "article_html": clean(
+            " ".join(
+                parser.article_blocks
+            )
+        ),
+        "embedded_json": extract_embedded_article(
+            raw
+        ),
+        "html_blocks": clean(
+            " ".join(
+                parser.blocks
+            )
+        ),
+    }
+
+    # Favoriser un vrai article plutôt qu'une
+    # longue navigation ou un pied de page.
+    order = [
+        "jsonld",
+        "article_html",
+        "embedded_json",
+        "html_blocks",
+    ]
+
+    body = ""
+    method = "none"
+
+    for candidate_method in order:
+        candidate = methods[candidate_method]
+
+        if (
+            len(candidate) >= MIN_ARTICLE_TEXT
+            and not is_generic_text(candidate)
+        ):
+            body = candidate
+            method = candidate_method
+            break
+
+    if not body:
+        body = max(
+            methods.values(),
+            key=len,
+            default=""
+        )
+
+        method = "fallback"
 
     return {
         "title": clean(title),
-        "published_at": publication,
-        "body": clean(body),
+        "published_at": published_at,
+        "body": body[:60000],
+        "method": method,
+        "is_generic": is_generic_text(body),
+        "body_length": len(body),
     }
 
 
 # ============================================================
-# POKEAPI AVEC CACHE
+# POKEAPI ET CACHE
 # ============================================================
 
-def update_pokeapi():
-    log("Actualisation PokéAPI")
+def fetch_pokeapi_catalogue():
+    species_data = fetch_json(
+        API + "/pokemon-species?limit=2000"
+    )
 
-    cache_path = DATA / "pokeapi-cache.json"
+    species = species_data.get(
+        "results", []
+    )
 
-    cache = load_json(cache_path, {}) or {}
+    ids = [
+        species_id(
+            item.get("url")
+        )
+        for item in species
+    ]
 
-    try:
-        species = fetch_json(
-            API + "/pokemon-species?limit=2000"
-        )["results"]
+    ids = [
+        number for number in ids
+        if number is not None
+    ]
 
-        ids = [
-            species_id(item["url"])
-            for item in species
+    if not ids:
+        raise RuntimeError(
+            "Aucune espèce reçue de PokéAPI"
+        )
+
+    max_id = max(ids)
+
+    generation_list = fetch_json(
+        API + "/generation?limit=100"
+    ).get("results", [])
+
+    ranges = []
+
+    for generation in generation_list:
+        details = fetch_json(
+            generation["url"]
+        )
+
+        values = [
+            species_id(
+                item.get("url")
+            )
+            for item in details.get(
+                "pokemon_species", []
+            )
         ]
 
-        ids = [
-            value for value in ids
+        values = [
+            value for value in values
             if value is not None
         ]
 
-        if not ids:
-            raise RuntimeError(
-                "Liste des espèces vide"
-            )
+        if values:
+            ranges.append([
+                min(values),
+                max(values)
+            ])
 
-        max_id = max(ids)
+        time.sleep(REQUEST_DELAY)
 
-        generations = fetch_json(
-            API + "/generation?limit=100"
-        )["results"]
+    ranges.sort(
+        key=lambda item: item[0]
+    )
 
-        ranges = []
-
-        for generation in generations:
-            details = fetch_json(
-                generation["url"]
-            )
-
-            values = [
-                species_id(item["url"])
-                for item in details.get(
-                    "pokemon_species", []
-                )
-            ]
-
-            values = [
-                value for value in values
-                if value is not None
-            ]
-
-            if values:
-                ranges.append([
-                    min(values),
-                    max(values)
-                ])
-
-        ranges.sort(
-            key=lambda item: item[0]
-        )
-
-        known_names = sorted({
+    return {
+        "version": VERSION,
+        "updated_at": utc_now(),
+        "max_id": max_id,
+        "ranges": ranges,
+        "known_names": sorted({
             item["name"].lower()
             for item in species
-        })
+        }),
+    }
 
-        cache = {
-            "version": VERSION,
-            "updated_at": now(),
-            "max_id": max_id,
-            "ranges": ranges,
-            "known_names": known_names,
-        }
 
-        save_json(cache_path, cache)
+def update_index(catalogue):
+    index_path = ROOT / "index.html"
 
-        source = "live"
-
-    except Exception as exc:
-        log(
-            "PokéAPI indisponible : "
-            + str(exc)
+    if not index_path.exists():
+        raise RuntimeError(
+            "index.html introuvable"
         )
 
-        if (
-            isinstance(cache.get("max_id"), int)
-            and isinstance(cache.get("ranges"), list)
-            and isinstance(cache.get("known_names"), list)
-        ):
-            log(
-                "Utilisation du cache local PokéAPI"
-            )
-            source = "cache"
+    original = index_path.read_text(
+        encoding="utf-8"
+    )
 
-        else:
-            log(
-                "Aucun cache valide : "
-                "conservation du site actuel"
-            )
+    max_id = catalogue["max_id"]
 
-            save_json(
-                DATA / "catalogue-status.json",
-                {
-                    "version": VERSION,
-                    "checked_at": now(),
-                    "status": "unavailable",
-                    "source": "none",
-                    "error": str(exc),
-                    "index_modified": False,
-                }
-            )
+    ranges = [
+        list(pair)
+        for pair in catalogue["ranges"]
+    ]
 
-            return set()
-
-    max_id = cache["max_id"]
-    ranges = [list(pair) for pair in cache["ranges"]]
-    known_names = set(cache["known_names"])
-
-    # Conserver les entrées provisoires Gen 10.
-    if max_id < 1028 and len(ranges) < 10:
+    # Conserver les trois entrées provisoires.
+    if (
+        max_id < 1028
+        and not any(
+            pair[1] >= 1028
+            for pair in ranges
+        )
+    ):
         ranges.append([
             max(1026, max_id + 1),
             1028
         ])
 
-    index_path = ROOT / "index.html"
-
-    original = index_path.read_text(
-        encoding="utf-8"
+    ranges.sort(
+        key=lambda pair: pair[0]
     )
 
     updated, max_count = re.subn(
@@ -715,97 +1051,207 @@ def update_pokeapi():
             + ";"
         ),
         updated,
-        count=1
+        count=1,
+        flags=re.DOTALL
     )
 
-    if max_count != 1 or range_count != 1:
+    if max_count != 1:
         raise RuntimeError(
-            "Marqueurs MAX/genRanges introuvables "
+            "Marqueur MAX introuvable dans index.html"
+        )
+
+    if range_count != 1:
+        raise RuntimeError(
+            "Marqueur genRanges introuvable "
             "dans index.html"
         )
 
-    # Filtrer les entrées provisoires déjà
-    # devenues officielles.
     updated = updated.replace(
         ".concat(newPokemon).sort((a,b)=>a.id-b.id)",
-        ".concat(newPokemon.filter(p=>p.id>MAX))"
-        ".sort((a,b)=>a.id-b.id)"
+        (
+            ".concat(newPokemon.filter(p=>p.id>MAX))"
+            ".sort((a,b)=>a.id-b.id)"
+        )
     )
 
-    if updated != original:
+    changed = updated != original
+
+    if changed:
         index_path.write_text(
             updated,
             encoding="utf-8"
         )
 
+    return changed, ranges
+
+
+def update_pokeapi():
+    log("Connexion à PokéAPI")
+
+    cache_path = (
+        DATA / "pokeapi-cache.json"
+    )
+
+    cache = load_json(
+        cache_path,
+        {}
+    ) or {}
+
+    source = "live"
+    error = None
+
+    try:
+        catalogue = fetch_pokeapi_catalogue()
+
+        save_json(
+            cache_path,
+            catalogue
+        )
+
+    except Exception as exc:
+        error = str(exc)
+
+        log(
+            "PokéAPI inaccessible : "
+            + error
+        )
+
+        valid_cache = (
+            isinstance(
+                cache.get("max_id"),
+                int
+            )
+            and isinstance(
+                cache.get("ranges"),
+                list
+            )
+            and isinstance(
+                cache.get("known_names"),
+                list
+            )
+        )
+
+        if valid_cache:
+            catalogue = cache
+            source = "cache"
+
+            log(
+                "Utilisation du cache PokéAPI"
+            )
+
+        else:
+            log(
+                "Aucun cache valide disponible"
+            )
+
+            save_json(
+                DATA / "catalogue-status.json",
+                {
+                    "version": VERSION,
+                    "checked_at": utc_now(),
+                    "status": "unavailable",
+                    "source": "none",
+                    "error": error,
+                    "index_modified": False,
+                }
+            )
+
+            return set()
+
+    changed, ranges = update_index(
+        catalogue
+    )
+
     save_json(
         DATA / "catalogue-status.json",
         {
             "version": VERSION,
-            "checked_at": now(),
+            "checked_at": utc_now(),
             "status": (
                 "ok" if source == "live"
                 else "cached"
             ),
             "source": source,
-            "pokeapi_max_species_id": max_id,
+            "pokeapi_max_species_id": (
+                catalogue["max_id"]
+            ),
             "generation_ranges": ranges,
-            "index_modified": updated != original,
-            "cache_updated_at": cache.get("updated_at"),
+            "index_modified": changed,
+            "cache_updated_at": catalogue.get(
+                "updated_at"
+            ),
+            "error": error,
         }
     )
 
     log(
-        f"PokéAPI : {max_id} — source {source}"
+        "Espèces PokéAPI : "
+        + str(catalogue["max_id"])
     )
 
-    return known_names
+    log(
+        "Source : " + source
+    )
+
+    return set(
+        catalogue["known_names"]
+    )
 
 
 # ============================================================
-# COLLECTE DES ACTUALITÉS
+# DÉCOUVERTE DES ACTUALITÉS
 # ============================================================
 
-def discover_html():
-    parser = parse_html(fetch(NEWS))
-    results = []
+def discover_news_page():
+    raw = fetch(NEWS)
+    parser = parse_html(raw)
 
-    for item in parser.links:
-        url = normalize_url(item["url"])
+    articles = []
 
-        if not url or not is_article(url):
+    for link in parser.links:
+        url = normalize_url(
+            link["url"]
+        )
+
+        if not url or not is_article_url(url):
             continue
 
-        results.append({
+        articles.append({
             "url": url,
             "title": (
-                item["title"]
+                link["title"]
                 or title_from_url(url)
             ),
             "published_at": None,
             "discovery_method": "html_link",
         })
 
-    return results
+    return articles
 
 
 def discover_sitemaps():
-    results = []
+    articles = []
     errors = []
 
     for sitemap in SITEMAPS:
         try:
-            root = ET.fromstring(fetch(sitemap))
+            raw = fetch(sitemap)
+            root = ET.fromstring(raw)
 
             for node in root.iter():
-                if node.tag.split("}")[-1] != "url":
+                if (
+                    node.tag.split("}")[-1]
+                    != "url"
+                ):
                     continue
 
                 url = None
                 lastmod = None
 
                 for child in node:
-                    key = child.tag.split("}")[-1]
+                    key = (
+                        child.tag.split("}")[-1]
+                    )
 
                     if key == "loc":
                         url = normalize_url(
@@ -817,77 +1263,109 @@ def discover_sitemaps():
                             child.text
                         )
 
-                if url and is_article(url):
-                    results.append({
+                if (
+                    url
+                    and is_article_url(url)
+                ):
+                    articles.append({
                         "url": url,
-                        "title": title_from_url(url),
+                        "title": title_from_url(
+                            url
+                        ),
                         "published_at": None,
                         "sitemap_lastmod": lastmod,
                         "discovery_method": "sitemap",
                     })
 
-                if len(results) >= 7000:
-                    break
-
         except Exception as exc:
             errors.append({
                 "source": sitemap,
-                "error": str(exc)[:250],
+                "error": str(exc)[:300],
             })
 
-        time.sleep(0.35)
-
-    return results, errors
-
-
-# ============================================================
-# CLASSEMENT DES ARTICLES
-# ============================================================
-
-def matches_any(patterns, text):
-    return any(
-        re.search(
-            pattern,
-            text,
-            re.IGNORECASE
+        time.sleep(
+            REQUEST_DELAY
         )
-        for pattern in patterns
-    )
+
+    return articles, errors
 
 
-def article_score(article):
-    title = clean(
-        article.get("title", "")
+# ============================================================
+# CLASSEMENT DES ANNONCES
+# ============================================================
+
+def classify_announcement(title, body=""):
+    title = clean(title)
+    body = clean(body)
+
+    text = title + " " + body
+
+    species = matches(
+        SPECIES_PATTERNS,
+        text
     )
+
+    gen10 = matches(
+        GEN10_PATTERNS,
+        text
+    )
+
+    form = matches(
+        FORM_PATTERNS,
+        text
+    )
+
+    commercial = matches(
+        LOW_PRIORITY_PATTERNS,
+        title
+    )
+
+    if form:
+        category = "new_form_or_mega"
+
+    elif species:
+        category = "possible_new_species"
+
+    elif gen10:
+        category = "generation_10_news"
+
+    else:
+        category = "general_news"
 
     score = 0
 
-    if matches_any(STRONG, title):
+    if species:
         score += 150
 
-    if matches_any(INTEREST, title):
-        score += 65
+    if gen10:
+        score += 110
 
-    if re.search(
-        r"\b(?:gen(?:eration)?\s*10|"
-        r"new species|new starters?|"
-        r"newly discovered)\b",
-        title,
-        re.IGNORECASE
-    ):
-        score += 100
+    if form:
+        score += 35
 
-    if matches_any(COMMERCIAL, title):
-        score -= 120
+    if commercial:
+        score -= 100
 
-    if re.search(
-        r"\b(?:pok[eé]mon go|"
-        r"community day|championship|"
-        r"tournament|livestream)\b",
-        title,
-        re.IGNORECASE
-    ):
-        score -= 35
+    if category == "possible_new_species":
+        score += 50
+
+    return {
+        "category": category,
+        "priority_score": score,
+        "species_pattern": species,
+        "generation_10_pattern": gen10,
+        "form_pattern": form,
+        "commercial_pattern": commercial,
+    }
+
+
+def article_score(article):
+    result = classify_announcement(
+        article.get("title", ""),
+        article.get("body_excerpt", "")
+    )
+
+    score = result["priority_score"]
 
     date = (
         article.get("published_at")
@@ -898,22 +1376,29 @@ def article_score(article):
 
     if age <= 7:
         score += 90
+
     elif age <= 30:
-        score += 70
+        score += 65
+
     elif age <= 90:
-        score += 45
+        score += 40
+
     elif age <= 180:
-        score += 20
+        score += 15
+
     elif age > 365:
         score -= 30
 
-    if article.get("discovery_method") == "html_link":
+    if (
+        article.get("discovery_method")
+        == "html_link"
+    ):
         score += 20
 
     return score
 
 
-def needs_inspection(article):
+def should_inspect(article):
     status = article.get(
         "inspection_status",
         "not_checked"
@@ -922,25 +1407,26 @@ def needs_inspection(article):
     if status == "not_checked":
         return True
 
-    if status in (
-        "suspected_generic_content",
-        "insufficient_content"
-    ):
-        delay = 90
+    if status == "ok":
+        days = RECHECK_OK_DAYS
 
-    elif status == "error":
-        delay = 7
+    elif status in (
+        "suspected_generic_content",
+        "insufficient_content",
+        "title_only"
+    ):
+        days = RECHECK_GENERIC_DAYS
 
     else:
-        delay = 30
+        days = RECHECK_ERROR_DAYS
 
     return age_days(
         article.get("inspected_at")
-    ) >= delay
+    ) >= days
 
 
 # ============================================================
-# ANALYSE DES ARTICLES
+# EXTRACTION DES NOMS POTENTIELS
 # ============================================================
 
 def extract_evidence(text):
@@ -950,9 +1436,12 @@ def extract_evidence(text):
     )
 
     return [
-        clean(sentence)[:500]
+        clean(sentence)[:450]
         for sentence in sentences
-        if matches_any(STRONG, sentence)
+        if matches(
+            SPECIES_PATTERNS,
+            sentence
+        )
     ][:12]
 
 
@@ -966,45 +1455,56 @@ def known_mentions(text, known_names):
 
     return sorted(
         words & known_names
-    )[:60]
+    )[:80]
 
 
-def candidate_names(evidence, known_names):
-    results = []
+def candidate_names(text, known_names):
+    """
+    Extraction prudente de noms propres.
 
-    for sentence in evidence:
-        matches = re.findall(
-            r"\b[A-Z][a-z]{3,}"
-            r"(?:[-'][A-Z]?[a-z]+)?\b",
-            sentence
-        )
+    Ces résultats ne sont jamais considérés
+    automatiquement comme de nouveaux Pokémon.
+    """
 
-        for name in matches:
-            lower = name.lower()
+    names = re.findall(
+        r"\b[A-Z][a-z]{3,}"
+        r"(?:[-'][A-Z]?[a-z]+)?\b",
+        text
+    )
 
-            if lower in EXCLUDED:
-                continue
+    candidates = []
 
-            if lower in MANUAL:
-                continue
+    for name in names:
+        lower = name.lower()
 
-            if lower in known_names:
-                continue
+        if lower in STOPWORDS:
+            continue
 
-            if len(name) > 24:
-                continue
+        if lower in known_names:
+            continue
 
-            if name not in results:
-                results.append(name)
+        if lower in MANUAL_POKEMON:
+            continue
 
-    return results[:30]
+        if len(name) > 24:
+            continue
 
+        if name not in candidates:
+            candidates.append(name)
+
+    return candidates[:30]
+
+
+# ============================================================
+# INSPECTION D'UN ARTICLE
+# ============================================================
 
 def inspect_article(article, known_names):
     result = dict(article)
 
-    result["inspected_at"] = now()
+    result["inspected_at"] = utc_now()
     result["verified_new_species"] = False
+
     result["announcement_evidence"] = []
     result["known_pokemon_mentions"] = []
     result["name_candidates_for_review"] = []
@@ -1014,285 +1514,289 @@ def inspect_article(article, known_names):
             article["url"]
         )
 
-        parser = parse_html(
+        extracted = extract_article(
             response["text"]
         )
 
-        info = metadata(parser)
+        if extracted["title"]:
+            result["title"] = (
+                extracted["title"]
+            )
 
-        if info["title"]:
-            result["title"] = info["title"]
+        if extracted["published_at"]:
+            result["published_at"] = (
+                extracted["published_at"]
+            )
 
-        if info["published_at"]:
-            result["published_at"] = info["published_at"]
+        body = extracted["body"]
 
-        paragraphs = clean(
-            " ".join(parser.paragraphs)
+        result["extracted_text_length"] = (
+            len(body)
         )
 
-        body = max(
-            paragraphs,
-            info["body"],
-            key=len
-        )[:60000]
-
-        result["extracted_text_length"] = len(body)
+        result["extraction_method"] = (
+            extracted["method"]
+        )
 
         result["content_fingerprint"] = (
-            hashlib.sha256(
-                body.encode("utf-8")
-            ).hexdigest()[:16]
+            fingerprint(body)
         )
 
-        if len(body) < MIN_TEXT:
+        result["body_excerpt"] = (
+            body[:1200]
+        )
+
+        if extracted["is_generic"]:
             result["inspection_status"] = (
-                "insufficient_content"
+                "title_only"
             )
-            return result
 
-        text = result["title"] + ". " + body
+            result["extraction_warning"] = (
+                "Contenu générique ou incomplet. "
+                "Analyse limitée au titre officiel."
+            )
 
-        evidence = extract_evidence(text)
+            text = result["title"]
 
-        result["announcement_evidence"] = evidence
+        else:
+            result["inspection_status"] = "ok"
+
+            text = (
+                result["title"]
+                + ". "
+                + body
+            )
+
+        classification = classify_announcement(
+            result["title"],
+            "" if extracted["is_generic"] else body
+        )
+
+        result["announcement_category"] = (
+            classification["category"]
+        )
+
+        result["title_signal_only"] = (
+            extracted["is_generic"]
+        )
+
+        evidence = extract_evidence(
+            text
+        )
+
+        result["announcement_evidence"] = (
+            evidence
+        )
 
         result["known_pokemon_mentions"] = (
-            known_mentions(text, known_names)
+            known_mentions(
+                text,
+                known_names
+            )
         )
 
-        if evidence:
+        if (
+            classification["category"]
+            == "possible_new_species"
+        ):
             result["name_candidates_for_review"] = (
                 candidate_names(
-                    evidence,
+                    " ".join(evidence),
                     known_names
                 )
             )
 
-        result["inspection_status"] = "ok"
-
     except Exception as exc:
         result["inspection_status"] = "error"
-        result["inspection_error"] = str(exc)[:250]
+        result["inspection_error"] = (
+            str(exc)[:300]
+        )
 
     return result
 
 
 # ============================================================
-# HISTORIQUE ET RAPPORTS
+# DÉTECTION DES CONTENUS GÉNÉRIQUES
 # ============================================================
 
-def update_news(known_names):
-    log("Collecte des actualités Pokémon")
-
-    history_path = DATA / "historique-actualites.json"
-
-    stored = load_json(
-        history_path,
-        {}
-    ) or {}
-
-    history = stored.get("articles", {})
-
-    if not isinstance(history, dict):
-        history = {}
-
-    previous = load_json(
-        DATA / "nouveautes-pokemon.json",
-        {}
-    ) or {}
-
-    for article in previous.get("articles", []):
-        if not isinstance(article, dict):
-            continue
-
-        url = normalize_url(
-            article.get("url", "")
-        )
-
-        if url and is_article(url) and url not in history:
-            history[url] = {
-                **article,
-                "url": url,
-                "first_seen": (
-                    previous.get("checked_at")
-                    or now()
-                ),
-                "last_seen": now(),
-            }
-
-    errors = []
-
-    try:
-        html_articles = discover_html()
-
-    except Exception as exc:
-        html_articles = []
-        errors.append({
-            "source": NEWS,
-            "error": str(exc)[:250],
-        })
-
-    sitemap_articles, sitemap_errors = (
-        discover_sitemaps()
-    )
-
-    errors.extend(sitemap_errors)
-
-    discovered = {}
-
-    for article in sitemap_articles + html_articles:
-        url = article["url"]
-
-        if url not in discovered:
-            discovered[url] = article
-
-        elif article["discovery_method"] == "html_link":
-            old = discovered[url]
-
-            discovered[url] = {
-                **old,
-                **article,
-                "sitemap_lastmod": old.get(
-                    "sitemap_lastmod"
-                ),
-            }
-
-    new_count = 0
-
-    for url, article in discovered.items():
-        if url not in history:
-            new_count += 1
-
-            history[url] = {
-                **article,
-                "first_seen": now(),
-                "last_seen": now(),
-                "inspection_status": "not_checked",
-                "verified_new_species": False,
-            }
-
-        else:
-            old = history[url]
-
-            old["last_seen"] = now()
-
-            if article["discovery_method"] == "html_link":
-                old["title"] = article["title"]
-
-            if article.get("sitemap_lastmod"):
-                old["sitemap_lastmod"] = (
-                    article["sitemap_lastmod"]
-                )
-
-    pending = []
-
-    for url, article in history.items():
-        if url not in discovered:
-            continue
-
-        if not needs_inspection(article):
-            continue
-
-        score = article_score(article)
-
-        if article.get("inspection_status") == "not_checked":
-            score += 15
-
-        pending.append((
-            score,
-            timestamp(
-                article.get("published_at")
-                or article.get("sitemap_lastmod")
-            ),
-            url,
-        ))
-
-    pending.sort(
-        key=lambda item: (item[0], item[1]),
-        reverse=True
-    )
-
-    inspected_count = 0
-
-    for _, _, url in pending[:MAX_INSPECTIONS]:
-        history[url] = inspect_article(
-            history[url],
-            known_names
-        )
-
-        inspected_count += 1
-        time.sleep(0.35)
-
+def mark_duplicate_generic_pages(history):
     fingerprints = {}
 
     for url, article in history.items():
-        fingerprint = article.get(
+        fp = article.get(
             "content_fingerprint"
         )
 
-        if fingerprint:
+        if fp:
             fingerprints.setdefault(
-                fingerprint, []
+                fp, []
             ).append(url)
 
-    generic_count = 0
+    count = 0
 
     for urls in fingerprints.values():
-        if len(urls) < 3:
+        if (
+            len(urls)
+            < GENERIC_FINGERPRINT_THRESHOLD
+        ):
             continue
 
         for url in urls:
             article = history[url]
 
+            if article.get(
+                "inspection_status"
+            ) not in (
+                "ok",
+                "title_only",
+                "suspected_generic_content"
+            ):
+                continue
+
             article["inspection_status"] = (
                 "suspected_generic_content"
             )
 
-            article["announcement_evidence"] = []
+            article["title_signal_only"] = True
+
+            article["extraction_warning"] = (
+                "Même contenu extrait sur plusieurs "
+                "articles différents. Le titre "
+                "reste utilisable comme indice."
+            )
+
+            article["announcement_evidence"] = (
+                extract_evidence(
+                    article.get("title", "")
+                )
+            )
+
             article["name_candidates_for_review"] = []
 
-            generic_count += 1
+            count += 1
 
+    return count
+
+
+# ============================================================
+# HISTORIQUE
+# ============================================================
+
+def load_history():
+    stored = load_json(
+        DATA / "historique-actualites.json",
+        {}
+    ) or {}
+
+    history = stored.get(
+        "articles", {}
+    )
+
+    if not isinstance(history, dict):
+        return {}
+
+    return history
+
+
+def merge_discovered(history, discovered):
+    new_count = 0
+
+    for url, article in discovered.items():
+        if url not in history:
+            history[url] = {
+                **article,
+                "first_seen": utc_now(),
+                "last_seen": utc_now(),
+                "inspection_status": "not_checked",
+                "verified_new_species": False,
+            }
+
+            new_count += 1
+
+        else:
+            previous = history[url]
+
+            previous["last_seen"] = utc_now()
+
+            if (
+                article.get("discovery_method")
+                == "html_link"
+            ):
+                previous["title"] = (
+                    article["title"]
+                )
+
+            if article.get(
+                "sitemap_lastmod"
+            ):
+                previous["sitemap_lastmod"] = (
+                    article["sitemap_lastmod"]
+                )
+
+    return new_count
+
+
+# ============================================================
+# RAPPORTS DE SURVEILLANCE
+# ============================================================
+
+def build_candidates(history):
     candidates = []
+    seen = set()
 
     for article in history.values():
-        if article.get("inspection_status") != "ok":
+        if article.get(
+            "inspection_status"
+        ) != "ok":
             continue
 
-        evidence = article.get(
-            "announcement_evidence", []
-        )
+        if article.get(
+            "announcement_category"
+        ) != "possible_new_species":
+            continue
 
         for name in article.get(
-            "name_candidates_for_review", []
+            "name_candidates_for_review",
+            []
         ):
+            key = (
+                name.lower(),
+                article.get("url", "")
+            )
+
+            if key in seen:
+                continue
+
+            seen.add(key)
+
             candidates.append({
                 "name": name,
-                "source_title": article.get("title", ""),
-                "source_url": article.get("url", ""),
-                "published_at": article.get("published_at"),
-                "evidence": evidence[:3],
+                "source_title": article.get(
+                    "title", ""
+                ),
+                "source_url": article.get(
+                    "url", ""
+                ),
+                "published_at": article.get(
+                    "published_at"
+                ),
+                "evidence": article.get(
+                    "announcement_evidence",
+                    []
+                )[:3],
                 "verified": False,
                 "status": "requires_manual_review",
             })
 
-    unique = {}
+    return candidates
 
-    for candidate in candidates:
-        key = (
-            candidate["name"].lower(),
-            candidate["source_url"]
-        )
 
-        unique[key] = candidate
-
-    candidates = list(unique.values())
-
+def build_priority(history):
     ordered = sorted(
         history.values(),
         key=lambda article: (
             article_score(article),
-            timestamp(
+            date_timestamp(
                 article.get("published_at")
                 or article.get("sitemap_lastmod")
             )
@@ -1300,62 +1804,255 @@ def update_news(known_names):
         reverse=True
     )
 
-    priority = [
-        {
-            "title": article.get("title", ""),
-            "url": article.get("url", ""),
-            "published_at": article.get("published_at"),
-            "sitemap_lastmod": article.get("sitemap_lastmod"),
-            "priority_score": article_score(article),
+    results = []
+
+    for article in ordered:
+        score = article_score(
+            article
+        )
+
+        if score <= 0:
+            continue
+
+        classification = classify_announcement(
+            article.get("title", ""),
+            article.get(
+                "body_excerpt", ""
+            )
+            if article.get(
+                "inspection_status"
+            ) == "ok"
+            else ""
+        )
+
+        results.append({
+            "title": article.get(
+                "title", ""
+            ),
+            "url": article.get(
+                "url", ""
+            ),
+            "published_at": article.get(
+                "published_at"
+            ),
+            "sitemap_lastmod": article.get(
+                "sitemap_lastmod"
+            ),
+            "priority_score": score,
+            "announcement_category": (
+                classification["category"]
+            ),
             "inspection_status": article.get(
                 "inspection_status",
                 "not_checked"
             ),
+            "title_signal_only": article.get(
+                "title_signal_only",
+                False
+            ),
             "announcement_evidence": article.get(
-                "announcement_evidence", []
+                "announcement_evidence",
+                []
             ),
-            "name_candidates_for_review": article.get(
-                "name_candidates_for_review", []
+            "name_candidates_for_review": (
+                article.get(
+                    "name_candidates_for_review",
+                    []
+                )
             ),
-        }
-        for article in ordered
-        if article_score(article) > 0
-    ][:MAX_PRIORITY]
+            "verified_new_species": False,
+        })
 
-    if len(history) > MAX_HISTORY:
-        retained = sorted(
+        if len(results) >= MAX_PRIORITY_ARTICLES:
+            break
+
+    return results, ordered
+
+
+# ============================================================
+# SURVEILLANCE PRINCIPALE
+# ============================================================
+
+def update_news(known_names):
+    log(
+        "Surveillance des actualités officielles"
+    )
+
+    history = load_history()
+
+    errors = []
+
+    try:
+        html_articles = discover_news_page()
+
+    except Exception as exc:
+        html_articles = []
+
+        errors.append({
+            "source": NEWS,
+            "error": str(exc)[:300],
+        })
+
+    sitemap_articles, sitemap_errors = (
+        discover_sitemaps()
+    )
+
+    errors.extend(
+        sitemap_errors
+    )
+
+    discovered = {}
+
+    for article in (
+        sitemap_articles + html_articles
+    ):
+        url = article["url"]
+
+        if url not in discovered:
+            discovered[url] = article
+
+        elif (
+            article["discovery_method"]
+            == "html_link"
+        ):
+            old = discovered[url]
+
+            discovered[url] = {
+                **old,
+                **article,
+                "sitemap_lastmod": (
+                    old.get(
+                        "sitemap_lastmod"
+                    )
+                ),
+            }
+
+    new_count = merge_discovered(
+        history,
+        discovered
+    )
+
+    # Priorité aux articles nouveaux, récents,
+    # et aux annonces de génération 10.
+    pending = []
+
+    for url, article in history.items():
+        if url not in discovered:
+            continue
+
+        if not should_inspect(article):
+            continue
+
+        score = article_score(article)
+
+        if (
+            article.get("inspection_status")
+            == "not_checked"
+        ):
+            score += 20
+
+        pending.append((
+            score,
+            date_timestamp(
+                article.get("published_at")
+                or article.get("sitemap_lastmod")
+            ),
+            url
+        ))
+
+    pending.sort(
+        reverse=True
+    )
+
+    inspected = 0
+
+    for _, _, url in pending[
+        :MAX_ARTICLES_PER_RUN
+    ]:
+        history[url] = inspect_article(
+            history[url],
+            known_names
+        )
+
+        inspected += 1
+
+        time.sleep(
+            REQUEST_DELAY
+        )
+
+    generic_count = (
+        mark_duplicate_generic_pages(
+            history
+        )
+    )
+
+    candidates = build_candidates(
+        history
+    )
+
+    priority, ordered = build_priority(
+        history
+    )
+
+    if len(history) > MAX_HISTORY_ARTICLES:
+        recent = sorted(
             history.items(),
-            key=lambda pair: (
-                article_score(pair[1]),
-                timestamp(pair[1].get("last_seen"))
+            key=lambda item: (
+                article_score(item[1]),
+                date_timestamp(
+                    item[1].get(
+                        "last_seen"
+                    )
+                )
             ),
             reverse=True
         )
 
-        history = dict(retained[:MAX_HISTORY])
+        history = dict(
+            recent[:MAX_HISTORY_ARTICLES]
+        )
+
+    checked_at = utc_now()
 
     status = (
-        "ok" if discovered
-        else "degraded_archive_only" if history
-        else "source_unavailable"
+        "ok"
+        if discovered
+        else (
+            "degraded_archive_only"
+            if history
+            else "source_unavailable"
+        )
     )
 
-    checked_at = now()
-
     diagnostics = {
-        "html_links": len(html_articles),
-        "sitemap_links": len(sitemap_articles),
-        "unique_discovered_urls": len(discovered),
+        "html_links": len(
+            html_articles
+        ),
+        "sitemap_links": len(
+            sitemap_articles
+        ),
+        "unique_discovered_urls": len(
+            discovered
+        ),
         "first_seen_urls": new_count,
-        "articles_inspected_this_run": inspected_count,
-        "history_entries": len(history),
-        "suspected_generic_content": generic_count,
-        "candidates_found": len(candidates),
+        "articles_inspected_this_run": inspected,
+        "history_entries": len(
+            history
+        ),
+        "suspected_generic_content": (
+            generic_count
+        ),
+        "candidates_found": len(
+            candidates
+        ),
+        "priority_announcements": len(
+            priority
+        ),
         "errors": errors,
     }
 
     save_json(
-        history_path,
+        DATA / "historique-actualites.json",
         {
             "version": VERSION,
             "checked_at": checked_at,
@@ -1370,7 +2067,9 @@ def update_news(known_names):
             "checked_at": checked_at,
             "status": status,
             "source": NEWS,
-            "articles": ordered[:MAX_VISIBLE],
+            "articles": ordered[
+                :MAX_VISIBLE_ARTICLES
+            ],
             "diagnostics": diagnostics,
         }
     )
@@ -1380,11 +2079,14 @@ def update_news(known_names):
         {
             "version": VERSION,
             "checked_at": checked_at,
-            "candidate_count": len(candidates),
+            "candidate_count": len(
+                candidates
+            ),
             "candidates": candidates,
             "notice": (
-                "Aucun ajout automatique sans "
-                "vérification officielle."
+                "Noms potentiels seulement. "
+                "Vérification officielle requise "
+                "avant tout ajout au Pokédex."
             ),
         }
     )
@@ -1394,7 +2096,9 @@ def update_news(known_names):
         {
             "version": VERSION,
             "checked_at": checked_at,
-            "announcement_count": len(priority),
+            "announcement_count": len(
+                priority
+            ),
             "announcements": priority,
         }
     )
@@ -1405,27 +2109,58 @@ def update_news(known_names):
             "version": VERSION,
             "checked_at": checked_at,
             "status": status,
-            "review_required": bool(candidates),
+            "review_required": bool(
+                candidates
+            ),
             "first_seen_urls": new_count,
-            "articles_inspected": inspected_count,
-            "candidate_count": len(candidates),
+            "articles_inspected": inspected,
+            "candidate_count": len(
+                candidates
+            ),
             "new_species_confirmed": 0,
             "source": NEWS,
         }
     )
 
-    log(f"Liens HTML : {len(html_articles)}")
-    log(f"Liens sitemap : {len(sitemap_articles)}")
-    log(f"Nouvelles URL : {new_count}")
-    log(f"Articles inspectés : {inspected_count}")
-    log(f"Contenus suspects : {generic_count}")
-    log(f"Annonces prioritaires : {len(priority)}")
-    log(f"Candidats à vérifier : {len(candidates)}")
-    log(f"Statut : {status}")
+    log(
+        f"Liens HTML : {len(html_articles)}"
+    )
+
+    log(
+        f"Liens sitemap : {len(sitemap_articles)}"
+    )
+
+    log(
+        f"Articles découverts : {len(discovered)}"
+    )
+
+    log(
+        f"Nouvelles URL : {new_count}"
+    )
+
+    log(
+        f"Articles inspectés : {inspected}"
+    )
+
+    log(
+        f"Contenus génériques : {generic_count}"
+    )
+
+    log(
+        f"Annonces prioritaires : {len(priority)}"
+    )
+
+    log(
+        f"Candidats à vérifier : {len(candidates)}"
+    )
+
+    log(
+        f"Statut actualités : {status}"
+    )
 
 
 # ============================================================
-# PROGRAMME PRINCIPAL
+# MAIN
 # ============================================================
 
 def main():
@@ -1435,13 +2170,15 @@ def main():
     )
 
     log("======================================")
-    log("POKEDEX ACETIQUE V5.4.1")
-    log("MISE À JOUR + CONNEXION ROBUSTE")
+    log("POKEDEX ACETIQUE V5.5")
+    log("SURVEILLANCE OFFICIELLE AMÉLIORÉE")
     log("======================================")
 
     known_names = update_pokeapi()
 
-    update_news(known_names)
+    update_news(
+        known_names
+    )
 
     log("======================================")
     log("ACTUALISATION TERMINÉE")
