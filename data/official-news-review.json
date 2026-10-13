@@ -1,7 +1,56 @@
 {
-  "checked_at": "2026-10-13T03:15:26.636965+00:00",
-  "status": "no_articles_detected",
+  "checked_at": "2026-10-13T03:20:55.840501+00:00",
+  "status": "ok",
   "review_required": true,
-  "articles_found": 0,
-  "source": "https://www.pokemon.com/us/pokemon-news"
+  "articles_found": 12,
+  "new_species_confirmed": 0,
+  "source": "https://www.pokemon.com/us/pokemon-news",
+  "diagnostics": {
+    "html_articles_found": 14,
+    "sitemap_articles_found": 0,
+    "retained_articles": 12,
+    "sitemap": {
+      "sitemaps_checked": 12,
+      "urls_inspected": 401,
+      "errors": [
+        {
+          "url": "https://www.pokemon.com/de/features/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/de/news/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/el/destacados/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/el/noticias/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/es/destacados/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/es/noticias/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/fr/articles/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/fr/actualites/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/it/approfondimenti/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        }
+      ]
+    },
+    "errors": []
+  }
 }

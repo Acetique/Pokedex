@@ -1,7 +1,226 @@
 {
-  "checked_at": "2026-10-13T03:15:26.636965+00:00",
-  "status": "no_articles_detected",
+  "checked_at": "2026-10-13T03:20:55.840501+00:00",
+  "status": "ok",
   "source": "https://www.pokemon.com/us/pokemon-news",
-  "articles": [],
-  "notice": "Official news links only; articles are not automatically classified as new Pokémon species."
+  "articles": [
+    {
+      "title": "Get Your Look Ready with Pokémon Center for Pokémon Night Out",
+      "url": "https://www.pokemon.com/us/news/get-your-look-ready-with-pokemon-center-for-pokemon-night-out",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Center",
+        "Night",
+        "Ready",
+        "Your Look"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokémon Pokopia Version 2.0.0 Adds New Quality of Life Improvements",
+      "url": "https://www.pokemon.com/us/news/pokemon-pokopia-version-2-0-0-adds-new-quality-of-life-improvements",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Adds",
+        "Life Improvements",
+        "Pokopia Version",
+        "Quality"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokémon Red & Pokémon Blue : Game Boy Jukebox Back in Stock at Pokémon Center",
+      "url": "https://www.pokemon.com/us/news/pokemon-red-pokemon-blue-game-boy-jukebox-back-in-stock-at-pokemon-center",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Blue",
+        "Center",
+        "Jukebox Back",
+        "Stock"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Own Pokémon Horizons: Season 3 Part 2 on Amazon, Apple TV, and YouTube Movies & TV",
+      "url": "https://www.pokemon.com/us/news/own-pokemon-horizons-season-3-part-2-on-amazon-apple-tv-and-youtube-movies-tv",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Amazon",
+        "Apple",
+        "Horizons",
+        "Movies",
+        "Part",
+        "Season"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokémon FireRed Version and Pokémon LeafGreen Version Now Link with Pokémon HOME",
+      "url": "https://www.pokemon.com/us/news/pokemon-firered-version-and-pokemon-leafgreen-version-now-link-with-pokemon-home",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Link",
+        "Version"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Zorua Can’t Hide During Pokémon GO’s October 2026 Community Day",
+      "url": "https://www.pokemon.com/us/news/zorua-cant-hide-during-pokemon-gos-october-2026-community-day",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [
+        "zorua"
+      ],
+      "name_candidates_for_review": [
+        "Community",
+        "Hide During",
+        "Zorua"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Compete in the 2027 Global Challenge II Online Competition",
+      "url": "https://www.pokemon.com/us/news/compete-in-the-2027-global-challenge-ii-online-competition",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Compete",
+        "Global Challenge",
+        "Online Competition"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "The Pokémon Fossil Museum Is Coming to the Denver Museum of Nature & Science",
+      "url": "https://www.pokemon.com/us/news/the-pokemon-fossil-museum-is-coming-to-the-denver-museum-of-nature-science",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Coming",
+        "Denver Museum",
+        "Fossil Museum",
+        "Nature",
+        "Science"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Celebrate Halloween with Spectacularly Spooky Pokémon Center Bundles",
+      "url": "https://www.pokemon.com/us/news/celebrate-halloween-with-spectacularly-spooky-pokemon-center-bundles",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Celebrate Halloween",
+        "Center Bundles",
+        "Spectacularly Spooky"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokémon Horizons: Season 4—Wonders Ahead Coming to Netflix",
+      "url": "https://www.pokemon.com/us/news/pokemon-horizons-season-4-wonders-ahead-coming-to-netflix",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Coming",
+        "Horizons",
+        "Netflix",
+        "Season",
+        "Wonders Ahead"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Pokémon and the European Space Agency Celebrate World Space Week 2026",
+      "url": "https://www.pokemon.com/us/news/pokemon-and-the-european-space-agency-celebrate-world-space-week-2026",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Agency Celebrate",
+        "European Space",
+        "Week",
+        "World Space"
+      ],
+      "verified_new_species": false
+    },
+    {
+      "title": "Join the Pokémon Night Out Livestream to Party from Home",
+      "url": "https://www.pokemon.com/us/news/join-the-pokemon-night-out-livestream-to-party-from-home",
+      "published_at": null,
+      "discovery_method": "html_link",
+      "known_pokemon_mentions": [],
+      "name_candidates_for_review": [
+        "Home",
+        "Join",
+        "Livestream",
+        "Night",
+        "Party"
+      ],
+      "verified_new_species": false
+    }
+  ],
+  "diagnostics": {
+    "html_articles_found": 14,
+    "sitemap_articles_found": 0,
+    "retained_articles": 12,
+    "sitemap": {
+      "sitemaps_checked": 12,
+      "urls_inspected": 401,
+      "errors": [
+        {
+          "url": "https://www.pokemon.com/de/features/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/de/news/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/el/destacados/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/el/noticias/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/es/destacados/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/es/noticias/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/fr/articles/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/fr/actualites/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        },
+        {
+          "url": "https://www.pokemon.com/it/approfondimenti/sitemap.xml",
+          "error": "not well-formed (invalid token): line 34, column 17"
+        }
+      ]
+    },
+    "errors": []
+  },
+  "notice": "Les articles sont issus de sources officielles accessibles. Les candidats de noms nécessitent une vérification humaine avant ajout au Pokédex."
 }
