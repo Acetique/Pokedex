@@ -1,13 +1,12 @@
 {
-  "version": "6.1",
-  "checked_at": "2026-10-13T23:51:59.305712+00:00",
-  "method": "historical_official_titles_contextual_detection",
+  "version": "6.2",
+  "checked_at": "2026-10-13T23:56:24.726118+00:00",
+  "method": "multi_name_official_announcement_contextual_detection",
   "known_species_count": 1875,
   "articles_analyzed": 2114,
   "candidate_count": 0,
   "pending_review_count": 0,
-  "rejected_count": 0,
   "manually_validated_count": 0,
   "candidates": [],
-  "notice": "Candidats non confirmés. Aucun ajout automatique au Pokédex."
+  "notice": "Aucun candidat n'est ajouté automatiquement au Pokédex."
 }
