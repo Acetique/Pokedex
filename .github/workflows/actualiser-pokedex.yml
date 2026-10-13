@@ -1,31 +1,44 @@
 
 name: Actualiser le Pokedex
 
+# ==========================================
+# POKEDEX ACETIQUE V6.1
+# Actualisation automatique du Pokédex
+# ==========================================
+
 on:
+  # Exécution manuelle depuis GitHub Actions
   workflow_dispatch:
 
+  # Exécution automatique chaque jour
   schedule:
-    # Tous les jours à 8 h UTC
-    # 4 h au Québec en été / 3 h en hiver
+    # 08:00 UTC
+    # Québec : 04:00 été / 03:00 hiver
     - cron: "0 8 * * *"
 
+# Autoriser GitHub Actions à enregistrer
+# les nouvelles données dans le dépôt.
 permissions:
   contents: write
 
+# Éviter deux actualisations simultanées.
 concurrency:
   group: actualiser-pokedex
   cancel-in-progress: false
 
 jobs:
+
   actualiser:
     name: Vérifier les nouveaux Pokémon
 
     runs-on: ubuntu-24.04
 
+    timeout-minutes: 30
+
     steps:
 
       # ==========================================
-      # 1. RÉCUPÉRATION DU DÉPÔT
+      # 1. RÉCUPÉRER LE DÉPÔT GITHUB
       # ==========================================
 
       - name: Récupérer le dépôt GitHub
@@ -34,7 +47,7 @@ jobs:
           persist-credentials: true
 
       # ==========================================
-      # 2. INSTALLATION DE PYTHON
+      # 2. INSTALLER PYTHON
       # ==========================================
 
       - name: Installer Python
@@ -43,7 +56,7 @@ jobs:
           python-version: "3.12"
 
       # ==========================================
-      # 3. PRÉPARATION DES DOSSIERS
+      # 3. PRÉPARER LES DOSSIERS
       # ==========================================
 
       - name: Préparer les dossiers
@@ -51,146 +64,276 @@ jobs:
           mkdir -p data
 
           echo "=================================="
-          echo "POKEDEX ACETIQUE"
-          echo "Initialisation"
+          echo "POKEDEX ACETIQUE V6.1"
+          echo "INITIALISATION"
           echo "=================================="
 
+          echo ""
+          echo "Version Python :"
           python --version
 
+          echo ""
+          echo "Dossier de travail :"
+          pwd
+
+          echo ""
+          echo "Fichiers Python disponibles :"
+          ls -lh *.py
+
       # ==========================================
-      # 4. ACTUALISATION DU CATALOGUE V5.8
+      # 4. ACTUALISER LE CATALOGUE V5.8
       # ==========================================
 
       - name: Actualiser le catalogue Pokédex V5.8
         run: |
           echo "=================================="
           echo "POKEDEX V5.8"
-          echo "Actualisation du catalogue"
+          echo "ACTUALISATION DU CATALOGUE"
           echo "=================================="
 
           python -u update_pokedex.py
 
       # ==========================================
-      # 5. DÉTECTION ANTICIPÉE V5.9
+      # 5. TESTER LE MOTEUR V6.1
       # ==========================================
 
-      - name: Détecter les nouveaux Pokémon V5.9
+      - name: Tester le moteur de détection V6.1
         run: |
           echo "=================================="
-          echo "POKEDEX V5.9"
-          echo "Détection des nouveaux Pokémon"
+          echo "POKEDEX V6.1"
+          echo "TESTS AUTOMATIQUES"
+          echo "=================================="
+
+          python -u detecter_nouveaux_pokemon.py --test
+
+      # ==========================================
+      # 6. DÉTECTION ANTICIPÉE V6.1
+      # ==========================================
+
+      - name: Détecter les nouveaux Pokémon V6.1
+        run: |
+          echo "=================================="
+          echo "POKEDEX V6.1"
+          echo "DÉTECTION ANTICIPÉE INTELLIGENTE"
           echo "=================================="
 
           python -u detecter_nouveaux_pokemon.py
 
       # ==========================================
-      # 6. NOMS OFFICIELS FRANÇAIS / ANGLAIS
+      # 7. ACTUALISER LES NOMS OFFICIELS
       # ==========================================
 
       - name: Actualiser les noms officiels FR EN
         run: |
           echo "=================================="
+          echo "POKEDEX ACETIQUE"
           echo "NOMS OFFICIELS FR / EN"
-          echo "Actualisation automatique"
           echo "=================================="
 
           python -u actualiser_noms_pokemon.py
 
       # ==========================================
-      # 7. VÉRIFICATION DES FICHIERS
+      # 8. VÉRIFIER LES FICHIERS GÉNÉRÉS
       # ==========================================
 
       - name: Vérifier les fichiers générés
         run: |
           echo "=================================="
-          echo "VÉRIFICATION DES DONNÉES"
+          echo "VÉRIFICATION DES DONNÉES V6.1"
           echo "=================================="
 
           python - <<'PY'
           import json
           from pathlib import Path
 
-          fichiers = [
+          required_files = [
               "data/noms-pokemon-fr.json",
               "data/pokemon-a-verifier.json",
+              "data/rapport-detection-v6.json",
               "data/catalogue-status.json",
               "data/sante-pokedex.json",
           ]
 
-          erreurs = []
+          errors = []
 
-          for nom in fichiers:
-              chemin = Path(nom)
+          for filename in required_files:
+              path = Path(filename)
 
-              if not chemin.exists():
-                  print(f"ERREUR : fichier absent : {nom}")
-                  erreurs.append(nom)
+              if not path.is_file():
+                  print(f"ERREUR : fichier absent : {filename}")
+                  errors.append(filename)
                   continue
 
               try:
-                  with chemin.open(
-                      "r", encoding="utf-8"
-                  ) as fichier:
-                      contenu = json.load(fichier)
+                  with path.open(
+                      "r",
+                      encoding="utf-8"
+                  ) as file:
+                      data = json.load(file)
 
-                  print(f"OK : {nom}")
+                  print(f"OK : {filename}")
 
-              except Exception as erreur:
-                  print(f"ERREUR : {nom} : {erreur}")
-                  erreurs.append(nom)
+              except (OSError, ValueError) as error:
+                  print(f"ERREUR : {filename} : {error}")
+                  errors.append(filename)
 
-          if erreurs:
+          if errors:
               raise SystemExit(
                   "Vérification échouée : "
-                  + ", ".join(erreurs)
+                  + ", ".join(errors)
               )
 
+          print("")
           print("Tous les fichiers JSON sont valides.")
           PY
 
       # ==========================================
-      # 8. ENREGISTREMENT AUTOMATIQUE SUR GITHUB
+      # 9. AFFICHER LE RAPPORT V6.1
       # ==========================================
 
-      - name: Enregistrer les modifications
+      - name: Afficher le rapport de détection V6.1
         run: |
+          echo "=================================="
+          echo "RAPPORT DE DÉTECTION V6.1"
+          echo "=================================="
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path(
+              "data/rapport-detection-v6.json"
+          )
+
+          with path.open(
+              "r",
+              encoding="utf-8"
+          ) as file:
+              report = json.load(file)
+
+          print(
+              "Version :",
+              report.get("version", "inconnue")
+          )
+
+          print(
+              "Articles analysés :",
+              report.get("articles_analyzed", 0)
+          )
+
+          print(
+              "Articles exclus par contexte :",
+              report.get(
+                  "excluded_product_event_articles",
+                  0
+              )
+          )
+
+          print(
+              "Correspondances détectées :",
+              report.get("pattern_matches", 0)
+          )
+
+          print(
+              "Espèces déjà connues exclues :",
+              report.get(
+                  "existing_species_matches",
+                  0
+              )
+          )
+
+          print(
+              "Nouveaux candidats :",
+              report.get("candidate_count", 0)
+          )
+
+          print(
+              "En attente de vérification :",
+              report.get("pending_review_count", 0)
+          )
+
+          print("")
+          print("Sources historiques :")
+
+          for name, stats in report.get(
+              "sources", {}
+          ).items():
+              print(
+                  f"- {name}: "
+                  f"{stats.get('articles', 0)} articles"
+              )
+
+          print("")
+          print(
+              "Faux positifs historiques éliminés :"
+          )
+
+          excluded = report.get(
+              "excluded_old_false_positives",
+              []
+          )
+
+          if excluded:
+              for name in excluded:
+                  print(f"- {name}")
+          else:
+              print("Aucun nouveau retrait.")
+
+          PY
+
+      # ==========================================
+      # 10. ENREGISTRER LES MODIFICATIONS
+      # ==========================================
+
+      - name: Enregistrer les modifications sur GitHub
+        run: |
+          echo "=================================="
+          echo "ENREGISTREMENT SUR GITHUB"
+          echo "=================================="
+
           git config user.name "github-actions[bot]"
+
           git config user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
 
+          # Enregistrer les données et le catalogue.
           git add index.html data/
 
+          # Ne pas créer de commit inutile.
           if git diff --cached --quiet; then
 
-            echo "=================================="
+            echo ""
             echo "Aucune modification détectée."
-            echo "=================================="
+            echo "Le Pokédex est déjà à jour."
 
           else
 
-            echo "=================================="
-            echo "Nouvelles données détectées."
-            echo "Enregistrement sur GitHub..."
-            echo "=================================="
+            echo ""
+            echo "Modifications détectées."
+            echo "Création du commit..."
 
             git commit -m \
-              "Actualisation automatique Pokédex V5.9"
+              "Actualisation automatique du Pokédex V6.1"
+
+            echo ""
+            echo "Envoi des modifications sur GitHub..."
 
             git push
 
-            echo "Modifications enregistrées."
+            echo ""
+            echo "Modifications enregistrées avec succès."
 
           fi
 
       # ==========================================
-      # 9. RÉSUMÉ FINAL
+      # 11. RÉSUMÉ FINAL
       # ==========================================
 
-      - name: Résumé de l'actualisation
+      - name: Résumé final du Pokédex
         if: always()
         run: |
           echo "=================================="
-          echo "POKEDEX ACETIQUE V5.9"
+          echo "POKEDEX ACETIQUE V6.1"
           echo "RÉSUMÉ FINAL"
           echo "=================================="
 
@@ -199,8 +342,10 @@ jobs:
           ls -lh data/ || true
 
           echo ""
-          echo "Statut Git :"
+          echo "État du dépôt Git :"
           git status --short
 
           echo ""
-          echo "Fin du workflow."
+          echo "=================================="
+          echo "FIN DE L'ACTUALISATION"
+          echo "=================================="
