@@ -2,10 +2,10 @@
 name: Actualiser le Pokedex
 
 on:
-  schedule:
-    - cron: "0 12 * * *"
-
   workflow_dispatch:
+
+  schedule:
+    - cron: "0 8 * * *"
 
 permissions:
   contents: write
@@ -15,34 +15,56 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  actualisation:
+  actualiser:
     name: Vérifier les nouveaux Pokémon
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Récupérer le dépôt
-        uses: actions/checkout@v6
+      - name: Récupérer le dépôt GitHub
+        uses: actions/checkout@v4
 
       - name: Installer Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Actualiser les données
+      - name: Créer le dossier de données
+        run: mkdir -p data
+
+      - name: Actualiser le catalogue Pokédex V5.8
         run: python update_pokedex.py
 
-      - name: Publier les modifications
-        shell: bash
+      - name: Détecter les nouveaux Pokémon potentiels V5.9
+        run: python detecter_nouveaux_pokemon.py
+
+      - name: Actualiser les noms officiels FR EN
+        run: python actualiser_noms_pokemon.py
+
+      - name: Enregistrer les modifications sur GitHub
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add index.html data/
 
-          if ! git diff --cached --quiet; then
+          if git diff --cached --quiet; then
+            echo "Aucune modification à enregistrer."
+          else
             git commit -m "Actualisation automatique du Pokédex"
             git push
-          else
-            echo "Aucun changement à publier."
           fi
+
+      - name: Résumé de l'actualisation
+        if: always()
+        run: |
+          echo "=================================="
+          echo "POKEDEX ACETIQUE"
+          echo "Actualisation terminée"
+          echo "=================================="
+
+          echo "Fichiers de données :"
+          ls -lh data/ || true
+
+          echo ""
+          echo "Statut Git :"
+          git status --short
