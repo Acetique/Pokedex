@@ -1,27 +1,25 @@
 
+
 name: Actualiser le Pokedex
 
 # ==========================================
-# POKEDEX ACETIQUE V6.1
-# Actualisation automatique du Pokédex
+# POKEDEX ACETIQUE V6.2
+# ACTUALISATION AUTOMATIQUE
 # ==========================================
 
 on:
-  # Exécution manuelle depuis GitHub Actions
   workflow_dispatch:
 
-  # Exécution automatique chaque jour
   schedule:
-    # 08:00 UTC
+    # Tous les jours à 08:00 UTC
     # Québec : 04:00 été / 03:00 hiver
     - cron: "0 8 * * *"
 
-# Autoriser GitHub Actions à enregistrer
-# les nouvelles données dans le dépôt.
+# Autoriser les commits automatiques.
 permissions:
   contents: write
 
-# Éviter deux actualisations simultanées.
+# Éviter deux exécutions simultanées.
 concurrency:
   group: actualiser-pokedex
   cancel-in-progress: false
@@ -38,7 +36,7 @@ jobs:
     steps:
 
       # ==========================================
-      # 1. RÉCUPÉRER LE DÉPÔT GITHUB
+      # 1. RÉCUPÉRER LE DÉPÔT
       # ==========================================
 
       - name: Récupérer le dépôt GitHub
@@ -64,17 +62,13 @@ jobs:
           mkdir -p data
 
           echo "=================================="
-          echo "POKEDEX ACETIQUE V6.1"
+          echo "POKEDEX ACETIQUE V6.2"
           echo "INITIALISATION"
           echo "=================================="
 
           echo ""
           echo "Version Python :"
           python --version
-
-          echo ""
-          echo "Dossier de travail :"
-          pwd
 
           echo ""
           echo "Fichiers Python disponibles :"
@@ -94,27 +88,27 @@ jobs:
           python -u update_pokedex.py
 
       # ==========================================
-      # 5. TESTER LE MOTEUR V6.1
+      # 5. TESTS AUTOMATIQUES V6.2
       # ==========================================
 
-      - name: Tester le moteur de détection V6.1
+      - name: Tester le moteur de détection V6.2
         run: |
           echo "=================================="
-          echo "POKEDEX V6.1"
+          echo "POKEDEX ACETIQUE V6.2"
           echo "TESTS AUTOMATIQUES"
           echo "=================================="
 
           python -u detecter_nouveaux_pokemon.py --test
 
       # ==========================================
-      # 6. DÉTECTION ANTICIPÉE V6.1
+      # 6. DÉTECTION ANTICIPÉE V6.2
       # ==========================================
 
-      - name: Détecter les nouveaux Pokémon V6.1
+      - name: Détecter les nouveaux Pokémon V6.2
         run: |
           echo "=================================="
-          echo "POKEDEX V6.1"
-          echo "DÉTECTION ANTICIPÉE INTELLIGENTE"
+          echo "POKEDEX ACETIQUE V6.2"
+          echo "DÉTECTION ANTICIPÉE PRO"
           echo "=================================="
 
           python -u detecter_nouveaux_pokemon.py
@@ -133,13 +127,13 @@ jobs:
           python -u actualiser_noms_pokemon.py
 
       # ==========================================
-      # 8. VÉRIFIER LES FICHIERS GÉNÉRÉS
+      # 8. VÉRIFIER LES FICHIERS JSON
       # ==========================================
 
       - name: Vérifier les fichiers générés
         run: |
           echo "=================================="
-          echo "VÉRIFICATION DES DONNÉES V6.1"
+          echo "VÉRIFICATION DES DONNÉES V6.2"
           echo "=================================="
 
           python - <<'PY'
@@ -150,6 +144,7 @@ jobs:
               "data/noms-pokemon-fr.json",
               "data/pokemon-a-verifier.json",
               "data/rapport-detection-v6.json",
+              "data/annonces-non-reconnues.json",
               "data/catalogue-status.json",
               "data/sante-pokedex.json",
           ]
@@ -160,7 +155,9 @@ jobs:
               path = Path(filename)
 
               if not path.is_file():
-                  print(f"ERREUR : fichier absent : {filename}")
+                  print(
+                      f"ERREUR : fichier absent : {filename}"
+                  )
                   errors.append(filename)
                   continue
 
@@ -169,12 +166,14 @@ jobs:
                       "r",
                       encoding="utf-8"
                   ) as file:
-                      data = json.load(file)
+                      json.load(file)
 
                   print(f"OK : {filename}")
 
               except (OSError, ValueError) as error:
-                  print(f"ERREUR : {filename} : {error}")
+                  print(
+                      f"ERREUR : {filename} : {error}"
+                  )
                   errors.append(filename)
 
           if errors:
@@ -188,24 +187,24 @@ jobs:
           PY
 
       # ==========================================
-      # 9. AFFICHER LE RAPPORT V6.1
+      # 9. AFFICHER LE RAPPORT V6.2
       # ==========================================
 
-      - name: Afficher le rapport de détection V6.1
+      - name: Afficher le rapport de détection V6.2
         run: |
           echo "=================================="
-          echo "RAPPORT DE DÉTECTION V6.1"
+          echo "RAPPORT DE DÉTECTION V6.2"
           echo "=================================="
 
           python - <<'PY'
           import json
           from pathlib import Path
 
-          path = Path(
+          report_path = Path(
               "data/rapport-detection-v6.json"
           )
 
-          with path.open(
+          with report_path.open(
               "r",
               encoding="utf-8"
           ) as file:
@@ -252,8 +251,21 @@ jobs:
               report.get("pending_review_count", 0)
           )
 
+          print(
+              "Validés manuellement :",
+              report.get("validated_count", 0)
+          )
+
+          print(
+              "Annonces non reconnues :",
+              report.get(
+                  "unrecognized_announcements",
+                  0
+              )
+          )
+
           print("")
-          print("Sources historiques :")
+          print("SOURCES HISTORIQUES :")
 
           for name, stats in report.get(
               "sources", {}
@@ -265,24 +277,160 @@ jobs:
 
           print("")
           print(
-              "Faux positifs historiques éliminés :"
+              "FAUX POSITIFS HISTORIQUES ÉLIMINÉS :"
           )
 
-          excluded = report.get(
+          removed = report.get(
               "excluded_old_false_positives",
               []
           )
 
-          if excluded:
-              for name in excluded:
+          if removed:
+              for name in removed:
                   print(f"- {name}")
           else:
               print("Aucun nouveau retrait.")
 
+          print("")
+          print("==================================")
+          print("FIN DU RAPPORT V6.2")
+          print("==================================")
           PY
 
       # ==========================================
-      # 10. ENREGISTRER LES MODIFICATIONS
+      # 10. AFFICHER LES CANDIDATS DÉTECTÉS
+      # ==========================================
+
+      - name: Afficher les nouveaux Pokémon potentiels
+        run: |
+          echo "=================================="
+          echo "NOUVEAUX POKÉMON POTENTIELS"
+          echo "=================================="
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path(
+              "data/pokemon-a-verifier.json"
+          )
+
+          with path.open(
+              "r",
+              encoding="utf-8"
+          ) as file:
+              data = json.load(file)
+
+          candidates = data.get(
+              "candidates", []
+          )
+
+          print(
+              "Nombre de candidats :",
+              len(candidates)
+          )
+
+          if not candidates:
+              print(
+                  "Aucun nouveau Pokémon potentiel."
+              )
+
+          for candidate in candidates:
+              print("")
+              print(
+                  "Nom :",
+                  candidate.get("name", "")
+              )
+              print(
+                  "Confiance :",
+                  candidate.get("confidence", "")
+              )
+              print(
+                  "Score :",
+                  candidate.get("score", 0)
+              )
+              print(
+                  "Statut :",
+                  candidate.get("status", "")
+              )
+              print(
+                  "Déjà provisoire :",
+                  candidate.get(
+                      "already_in_site_provisionally",
+                      False
+                  )
+              )
+
+              sources = candidate.get(
+                  "sources", []
+              )
+
+              print(
+                  "Nombre de sources :",
+                  len(sources)
+              )
+
+              for source in sources[:5]:
+                  print(
+                      "-",
+                      source.get("title", "")
+                  )
+                  print(
+                      " ",
+                      source.get("url", "")
+                  )
+          PY
+
+      # ==========================================
+      # 11. AFFICHER LES ANNONCES NON RECONNUES
+      # ==========================================
+
+      - name: Afficher les annonces à examiner
+        run: |
+          echo "=================================="
+          echo "ANNONCES NON RECONNUES V6.2"
+          echo "=================================="
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path(
+              "data/annonces-non-reconnues.json"
+          )
+
+          with path.open(
+              "r",
+              encoding="utf-8"
+          ) as file:
+              data = json.load(file)
+
+          announcements = data.get(
+              "announcements", []
+          )
+
+          print(
+              "Nombre total :",
+              len(announcements)
+          )
+
+          print("")
+          print("20 premières annonces :")
+
+          for item in announcements[:20]:
+              print("")
+              print(
+                  "-",
+                  item.get("title", "")
+              )
+              print(
+                  " ",
+                  item.get("url", "")
+              )
+          PY
+
+      # ==========================================
+      # 12. ENREGISTRER SUR GITHUB
       # ==========================================
 
       - name: Enregistrer les modifications sur GitHub
@@ -296,10 +444,14 @@ jobs:
           git config user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Enregistrer les données et le catalogue.
+          # Inclut :
+          # - catalogue
+          # - noms officiels
+          # - candidats
+          # - rapports
+          # - annonces non reconnues
           git add index.html data/
 
-          # Ne pas créer de commit inutile.
           if git diff --cached --quiet; then
 
             echo ""
@@ -313,29 +465,33 @@ jobs:
             echo "Création du commit..."
 
             git commit -m \
-              "Actualisation automatique du Pokédex V6.1"
+              "Actualisation automatique Pokédex V6.2"
 
             echo ""
-            echo "Envoi des modifications sur GitHub..."
+            echo "Envoi vers GitHub..."
 
             git push
 
             echo ""
-            echo "Modifications enregistrées avec succès."
+            echo "Modifications enregistrées."
 
           fi
 
       # ==========================================
-      # 11. RÉSUMÉ FINAL
+      # 13. RÉSUMÉ FINAL
       # ==========================================
 
-      - name: Résumé final du Pokédex
+      - name: Résumé final du Pokédex V6.2
         if: always()
         run: |
           echo "=================================="
-          echo "POKEDEX ACETIQUE V6.1"
+          echo "POKEDEX ACETIQUE V6.2"
           echo "RÉSUMÉ FINAL"
           echo "=================================="
+
+          echo ""
+          echo "Version Python :"
+          python --version
 
           echo ""
           echo "Fichiers du dossier data :"
