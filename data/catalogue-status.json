@@ -1,9 +1,10 @@
 {
-  "version": "5.5",
-  "checked_at": "2026-10-13T03:53:49.174429+00:00",
+  "version": "5.6",
+  "checked_at": "2026-10-13T04:04:17.217800+00:00",
   "status": "ok",
   "source": "live",
   "pokeapi_max_species_id": 1025,
+  "previous_max_species_id": 1025,
   "generation_ranges": [
     [
       1,
@@ -46,7 +47,9 @@
       1028
     ]
   ],
+  "new_species_count": 0,
+  "new_species_names": [],
   "index_modified": false,
-  "cache_updated_at": "2026-10-13T03:53:49.159033+00:00",
+  "cache_updated_at": "2026-10-13T04:04:17.215158+00:00",
   "error": null
 }
