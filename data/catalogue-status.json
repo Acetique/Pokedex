@@ -1,5 +1,8 @@
 {
-  "checked_at": "2026-10-13T03:33:26.228567+00:00",
+  "version": "5.4.1",
+  "checked_at": "2026-10-13T03:42:45.783613+00:00",
+  "status": "ok",
+  "source": "live",
   "pokeapi_max_species_id": 1025,
   "generation_ranges": [
     [
@@ -43,5 +46,6 @@
       1028
     ]
   ],
-  "source": "https://pokeapi.co/api/v2/pokemon-species"
+  "index_modified": false,
+  "cache_updated_at": "2026-10-13T03:42:45.782322+00:00"
 }

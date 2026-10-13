@@ -1,0 +1,507 @@
+{
+  "version": "5.4.1",
+  "checked_at": "2026-10-13T03:43:03.213274+00:00",
+  "announcement_count": 50,
+  "announcements": [
+    {
+      "title": "Check Out New Pokémon League Prizes Coming this October",
+      "url": "https://www.pokemon.com/us/news/check-out-new-pokemon-league-prizes-coming-this-october",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-18T16:45:56.543000+00:00",
+      "priority_score": 135,
+      "inspection_status": "ok",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokémon Pokopia Version 2.0.0 Adds New Quality of Life Improvements",
+      "url": "https://www.pokemon.com/us/news/pokemon-pokopia-version-2-0-0-adds-new-quality-of-life-improvements",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-08T18:03:03.041000+00:00",
+      "priority_score": 110,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokémon FireRed Version and Pokémon LeafGreen Version Now Link with Pokémon HOME",
+      "url": "https://www.pokemon.com/us/news/pokemon-firered-version-and-pokemon-leafgreen-version-now-link-with-pokemon-home",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-06T20:29:21.368000+00:00",
+      "priority_score": 110,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Own Pokémon Horizons: Season 3 Part 2 on Amazon, Apple TV, and YouTube Movies & TV",
+      "url": "https://www.pokemon.com/us/news/own-pokemon-horizons-season-3-part-2-on-amazon-apple-tv-and-youtube-movies-tv",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-06T17:36:59.212000+00:00",
+      "priority_score": 110,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "New Pokemon Sleep Tracks Are Now Available On Spotify",
+      "url": "https://www.pokemon.com/us/news/new-pokemon-sleep-tracks-are-now-available-on-spotify",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-03T22:40:44.692000+00:00",
+      "priority_score": 110,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "The Pokemon Club Program Is Expanding",
+      "url": "https://www.pokemon.com/us/news/the-pokemon-club-program-is-expanding",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-09T18:52:02.534000+00:00",
+      "priority_score": 90,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "See The New Trailer For Pokemon Winds And Pokemon Waves Coming To Nintendo Switch 2",
+      "url": "https://www.pokemon.com/us/news/see-the-new-trailer-for-pokemon-winds-and-pokemon-waves-coming-to-nintendo-switch-2",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-09T18:34:24.579000+00:00",
+      "priority_score": 90,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Root Root Root For Pokemon Baseball",
+      "url": "https://www.pokemon.com/us/news/root-root-root-for-pokemon-baseball",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-08T23:59:48.309000+00:00",
+      "priority_score": 90,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Compete in the 2027 Global Challenge II Online Competition",
+      "url": "https://www.pokemon.com/us/news/compete-in-the-2027-global-challenge-ii-online-competition",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-05T20:57:30.403000+00:00",
+      "priority_score": 90,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "The Pokémon Fossil Museum Is Coming to the Denver Museum of Nature & Science",
+      "url": "https://www.pokemon.com/us/news/the-pokemon-fossil-museum-is-coming-to-the-denver-museum-of-nature-science",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-05T20:47:34.325000+00:00",
+      "priority_score": 90,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokémon and the European Space Agency Celebrate World Space Week 2026",
+      "url": "https://www.pokemon.com/us/news/pokemon-and-the-european-space-agency-celebrate-world-space-week-2026",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-05T17:29:52.013000+00:00",
+      "priority_score": 90,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokémon Horizons: Season 4—Wonders Ahead Coming to Netflix",
+      "url": "https://www.pokemon.com/us/news/pokemon-horizons-season-4-wonders-ahead-coming-to-netflix",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-05T16:47:56.545000+00:00",
+      "priority_score": 90,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "See The Clever Cool And Cute Winners Of The Pokemon Presents Super Pet Contest",
+      "url": "https://www.pokemon.com/us/news/see-the-clever-cool-and-cute-winners-of-the-pokemon-presents-super-pet-contest",
+      "published_at": null,
+      "sitemap_lastmod": "2026-05-21T16:29:12.765000+00:00",
+      "priority_score": 85,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Presents Super Pet Contest Offers The Ulti Mutt Pet Celebration",
+      "url": "https://www.pokemon.com/us/news/pokemon-presents-super-pet-contest-offers-the-ulti-mutt-pet-celebration",
+      "published_at": null,
+      "sitemap_lastmod": "2026-05-21T16:28:18.359000+00:00",
+      "priority_score": 85,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Firered Version And Pokemon Leafgreen Version Link With Pokemon Home This October",
+      "url": "https://www.pokemon.com/us/news/pokemon-firered-version-and-pokemon-leafgreen-version-link-with-pokemon-home-this-october",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-01T22:38:16.664000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Gather Pumpkin Candy For Pumpkaboo In Pokemon Pokopia",
+      "url": "https://www.pokemon.com/us/news/gather-pumpkin-candy-for-pumpkaboo-in-pokemon-pokopia",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-29T17:56:02.658000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Join The Pokemon Night Out Party",
+      "url": "https://www.pokemon.com/us/news/join-the-pokemon-night-out-party",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-25T20:32:29.172000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Partners With The European Space Agency For World Space Week 2026",
+      "url": "https://www.pokemon.com/us/news/pokemon-partners-with-the-european-space-agency-for-world-space-week-2026",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-24T17:13:21.060000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Pokopia Tracks To Study And Relax To",
+      "url": "https://www.pokemon.com/us/news/pokemon-pokopia-tracks-to-study-and-relax-to",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-24T16:37:40.083000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Take On The 2027 Global Challenge I",
+      "url": "https://www.pokemon.com/us/news/take-on-the-2027-global-challenge-i",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-24T00:01:31.534000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Legends Z A Nintendo Switch 2 Edition Mega Dimension Bundle Coming Soon",
+      "url": "https://www.pokemon.com/us/news/pokemon-legends-z-a-nintendo-switch-2-edition-mega-dimension-bundle-coming-soon",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-23T22:55:27.371000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Announcing Pokemon Unite Aeos Crown 2027",
+      "url": "https://www.pokemon.com/us/news/announcing-pokemon-unite-aeos-crown-2027",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-21T16:13:36.730000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Browse Photos From Pokemonxp And The 2026 Pokemon World Championships",
+      "url": "https://www.pokemon.com/us/news/browse-photos-from-pokemonxp-and-the-2026-pokemon-world-championships",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-19T17:29:35.420000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Horizons Season 3 Rising Hope Part 4 Now On Netflix",
+      "url": "https://www.pokemon.com/us/news/pokemon-horizons-season-3-rising-hope-part-4-now-on-netflix",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-17T21:20:26.495000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Celebrate Pokeween With Play Pokemon Events",
+      "url": "https://www.pokemon.com/us/news/celebrate-pokeween-with-play-pokemon-events",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-14T17:29:01.384000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Meet Mega Malamar A Newly Discovered Mega Evolved Pokemon In Pokemon Legends Z A",
+      "url": "https://www.pokemon.com/us/news/meet-mega-malamar-a-newly-discovered-mega-evolved-pokemon-in-pokemon-legends-z-a",
+      "published_at": null,
+      "sitemap_lastmod": "2025-09-10T13:22:26.575000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Meet Mega Victreebel A Newly Discovered Mega Evolved Pokemon In Pokemon Legends Z A",
+      "url": "https://www.pokemon.com/us/news/meet-mega-victreebel-a-newly-discovered-mega-evolved-pokemon-in-pokemon-legends-z-a",
+      "published_at": null,
+      "sitemap_lastmod": "2025-08-21T02:19:47.910000+00:00",
+      "priority_score": 70,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "News And Updates From The Pokemon Day 2026 Pokemon Presents",
+      "url": "https://www.pokemon.com/us/news/news-and-updates-from-the-pokemon-day-2026-pokemon-presents",
+      "published_at": null,
+      "sitemap_lastmod": "2026-02-27T17:47:18.880000+00:00",
+      "priority_score": 65,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Watch The New Pokemon Presents This Pokemon Day On February 27 2026",
+      "url": "https://www.pokemon.com/us/news/watch-the-new-pokemon-presents-this-pokemon-day-on-february-27-2026",
+      "published_at": null,
+      "sitemap_lastmod": "2026-02-19T17:13:40.311000+00:00",
+      "priority_score": 65,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Zorua Can’t Hide During Pokémon GO’s October 2026 Community Day",
+      "url": "https://www.pokemon.com/us/news/zorua-cant-hide-during-pokemon-gos-october-2026-community-day",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-05T18:00:41.422000+00:00",
+      "priority_score": 55,
+      "inspection_status": "ok",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Join the Pokémon Night Out Livestream to Party from Home",
+      "url": "https://www.pokemon.com/us/news/join-the-pokemon-night-out-livestream-to-party-from-home",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-01T16:24:51.531000+00:00",
+      "priority_score": 55,
+      "inspection_status": "ok",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Preview The Excitement Of Pokemon Night Out",
+      "url": "https://www.pokemon.com/us/news/preview-the-excitement-of-pokemon-night-out",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-11T19:06:34.009000+00:00",
+      "priority_score": 45,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Get Ready To Register For The 2027 Latin America International Championships",
+      "url": "https://www.pokemon.com/us/news/get-ready-to-register-for-the-2027-latin-america-international-championships",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-10T21:25:52.951000+00:00",
+      "priority_score": 45,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "2026 Pokemon World Championships Event Results",
+      "url": "https://www.pokemon.com/us/news/2026-pokemon-world-championships-event-results",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-10T17:22:14.355000+00:00",
+      "priority_score": 45,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Research Mewtwos Mysterious Sleep Styles In Pokemon Sleep",
+      "url": "https://www.pokemon.com/us/news/research-mewtwos-mysterious-sleep-styles-in-pokemon-sleep",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-09T18:52:19.900000+00:00",
+      "priority_score": 45,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Pokopia Expansion Pass Dlc Part 2 Trailer",
+      "url": "https://www.pokemon.com/us/news/pokemon-pokopia-expansion-pass-dlc-part-2-trailer",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-09T14:48:52.206000+00:00",
+      "priority_score": 45,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Take A Hike With Pokemon Gos New Season Twilight Trails",
+      "url": "https://www.pokemon.com/us/news/take-a-hike-with-pokemon-gos-new-season-twilight-trails",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-04T14:58:13.159000+00:00",
+      "priority_score": 45,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Quick Attack Top Moments From The 2026 Pokemon World Championships",
+      "url": "https://www.pokemon.com/us/news/quick-attack-top-moments-from-the-2026-pokemon-world-championships",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-01T21:34:21.669000+00:00",
+      "priority_score": 45,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Champions Junior Is Coming To Nintendo Eshop In Germany And Brazil",
+      "url": "https://www.pokemon.com/us/news/pokemon-champions-junior-is-coming-to-nintendo-eshop-in-germany-and-brazil",
+      "published_at": null,
+      "sitemap_lastmod": "2026-09-01T17:00:28.648000+00:00",
+      "priority_score": 45,
+      "inspection_status": "suspected_generic_content",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemonxp And The 2026 Pokemon World Championships Closing Ceremonies Recap",
+      "url": "https://www.pokemon.com/us/news/pokemonxp-and-the-2026-pokemon-world-championships-closing-ceremonies-recap",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-31T04:06:36.561000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "New Feature Length Animated Film Pokemon Wild Card Coming Soon",
+      "url": "https://www.pokemon.com/us/news/new-feature-length-animated-film-pokemon-wild-card-coming-soon",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-30T21:56:32.735000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Tales The Misadventures Of Sirfetchd Pichu Coming To Disney In 2027",
+      "url": "https://www.pokemon.com/us/news/pokemon-tales-the-misadventures-of-sirfetchd-pichu-coming-to-disney-in-2027",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-28T17:59:06.148000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Get Ready For Regulation Set M C In Pokemon Champions",
+      "url": "https://www.pokemon.com/us/news/get-ready-for-regulation-set-m-c-in-pokemon-champions",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-28T00:53:19.070000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Tune In To Worlds And Pokemonxp For Top Tier Digital Rewards",
+      "url": "https://www.pokemon.com/us/news/tune-in-to-worlds-and-pokemonxp-for-top-tier-digital-rewards",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-27T22:46:02.985000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Pokopias Pokemonxp Worlds Cloud Island Is Live",
+      "url": "https://www.pokemon.com/us/news/pokemon-pokopias-pokemonxp-worlds-cloud-island-is-live",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-26T17:30:27.172000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Play Pokemon Rules And Resources Updated For Q3 2026",
+      "url": "https://www.pokemon.com/us/news/play-pokemon-rules-and-resources-updated-for-q3-2026",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-26T17:05:39.999000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Celebrate Worlds And Pokemonxp With Champion Level Bundles And A Pikachu Coin",
+      "url": "https://www.pokemon.com/us/news/celebrate-worlds-and-pokemonxp-with-champion-level-bundles-and-a-pikachu-coin",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-26T15:18:39.887000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Preorder Pokemon Polaroid Special Edition Range Cameras Now",
+      "url": "https://www.pokemon.com/us/news/preorder-pokemon-polaroid-special-edition-range-cameras-now",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-25T12:57:25.669000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Catch All The Pokemonxp And 2026 Pokemon World Championships Action",
+      "url": "https://www.pokemon.com/us/news/catch-all-the-pokemonxp-and-2026-pokemon-world-championships-action",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-24T23:12:25.990000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Gos 2026 Pokemon World Championships Event",
+      "url": "https://www.pokemon.com/us/news/pokemon-gos-2026-pokemon-world-championships-event",
+      "published_at": null,
+      "sitemap_lastmod": "2026-08-24T21:47:37.392000+00:00",
+      "priority_score": 45,
+      "inspection_status": "not_checked",
+      "announcement_evidence": [],
+      "name_candidates_for_review": []
+    }
+  ]
+}
