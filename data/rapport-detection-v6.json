@@ -1,0 +1,13 @@
+{
+  "version": "6.0",
+  "checked_at": "2026-10-13T23:38:00.668653+00:00",
+  "articles_analyzed": 100,
+  "excluded_product_event_articles": 31,
+  "pattern_matches": 0,
+  "existing_species_matches": 0,
+  "candidate_count": 0,
+  "pending_review_count": 0,
+  "validated_count": 0,
+  "reference_source": "pokeapi",
+  "excluded_old_false_positives": []
+}
