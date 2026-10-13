@@ -2,12 +2,9 @@
 name: Actualiser le Pokedex
 
 on:
-  # Vérification quotidienne à 8 h au Québec (heure d'été)
-  # ou 7 h en hiver
   schedule:
     - cron: "0 12 * * *"
 
-  # Lancement manuel depuis GitHub Actions
   workflow_dispatch:
 
 permissions:
@@ -24,40 +21,30 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      # 1. Récupérer les fichiers GitHub
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
 
-      # 2. Installer Python sans cache pip
       - name: Installer Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      # 3. Créer le dossier data
       - name: Préparer le dossier data
-        run: |
-          mkdir -p data
+        run: mkdir -p data
 
-      # 4. Vérifier les nouveautés dans PokéAPI
       - name: Actualiser les données Pokémon
-        run: |
-          python update_pokedex.py
+        run: python update_pokedex.py
 
-      # 5. Détecter les fichiers modifiés
       - name: Vérifier les modifications
         id: changes
         shell: bash
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Des modifications ont été détectées."
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Aucune modification détectée."
           fi
 
-      # 6. Publier les modifications sur GitHub
       - name: Publier les modifications
         if: steps.changes.outputs.changed == 'true'
         shell: bash
@@ -70,15 +57,7 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m "Actualisation automatique du Pokédex"
             git push
-            echo "Modifications publiées."
-          else
-            echo "Aucun fichier à publier."
           fi
 
-      # 7. Confirmation
       - name: Résultat final
-        run: |
-          echo "======================================"
-          echo "POKEDEX - ACTUALISATION TERMINEE"
-          echo "======================================"
-          echo "Vérification des nouveaux Pokémon terminée."
+        run: echo "Actualisation du Pokédex terminée."
