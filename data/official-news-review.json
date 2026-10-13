@@ -1,9 +1,9 @@
 {
   "version": "5.8",
-  "checked_at": "2026-10-13T12:21:58.327857+00:00",
+  "checked_at": "2026-10-13T23:14:28.691973+00:00",
   "status": "ok",
   "review_required": true,
-  "first_seen_urls": 0,
+  "first_seen_urls": 1,
   "articles_inspected": 0,
   "blocked_articles": 0,
   "candidate_count": 0,
