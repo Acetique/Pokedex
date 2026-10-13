@@ -2,12 +2,12 @@
 name: Actualiser le Pokedex
 
 on:
+  # Vérification automatique chaque jour à 8 h au Québec
   schedule:
-    # 8 h au Québec (heure d'été)
-    - cron: "0 12 * * *"
+    - cron: "0 8 * * *"
       timezone: "America/Toronto"
 
-  # Permet le lancement manuel
+  # Permet de lancer manuellement
   workflow_dispatch:
 
 permissions:
@@ -20,43 +20,80 @@ concurrency:
 jobs:
   actualisation:
     name: Vérifier les nouveaux Pokémon
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+
+    timeout-minutes: 20
 
     steps:
+      # 1. Télécharger les fichiers du dépôt
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
         with:
           persist-credentials: true
 
+      # 2. Installer Python
       - name: Installer Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements.txt"
 
+      # 3. Installer les dépendances
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      # 4. Préparer le dossier de données
+      - name: Préparer le dossier data
+        run: |
+          mkdir -p data
+
+      # 5. Vérifier les nouveaux Pokémon
       - name: Actualiser les données Pokémon
         run: |
           python update_pokedex.py
 
-      - name: Vérifier les changements
+      # 6. Vérifier si les données ont changé
+      - name: Vérifier les modifications
         id: changes
+        shell: bash
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Nouvelles données détectées."
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Aucune nouvelle donnée."
           fi
 
-      - name: Publier les nouvelles données
+      # 7. Enregistrer les nouvelles données
+      - name: Publier les modifications
         if: steps.changes.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -A
-          git commit -m "Mise à jour automatique du Pokédex"
-          git push
+          git add data/
 
-      - name: Résultat
+          if ! git diff --cached --quiet; then
+            git commit -m "Actualisation automatique du Pokédex"
+            git push
+          else
+            echo "Aucune modification dans data/."
+          fi
+
+      # 8. Afficher le résultat
+      - name: Résultat final
         run: |
-          echo "Vérification Pokémon terminée."
+          echo "================================="
+          echo "POKEDEX - ACTUALISATION TERMINEE"
+          echo "================================="
+          echo "Vérification PokéAPI terminée."
+          echo "Surveillance Web selon le script Python."
+          echo "Données mises à jour si disponibles."
