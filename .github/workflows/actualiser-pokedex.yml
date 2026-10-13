@@ -1,1 +1,62 @@
 
+name: Actualiser le Pokedex
+
+on:
+  schedule:
+    # 8 h au Québec (heure d'été)
+    - cron: "0 12 * * *"
+      timezone: "America/Toronto"
+
+  # Permet le lancement manuel
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: actualiser-pokedex
+  cancel-in-progress: false
+
+jobs:
+  actualisation:
+    name: Vérifier les nouveaux Pokémon
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Actualiser les données Pokémon
+        run: |
+          python update_pokedex.py
+
+      - name: Vérifier les changements
+        id: changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publier les nouvelles données
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "Mise à jour automatique du Pokédex"
+          git push
+
+      - name: Résultat
+        run: |
+          echo "Vérification Pokémon terminée."
