@@ -1,9 +1,9 @@
 {
   "version": "6.2",
-  "checked_at": "2026-10-16T08:16:08.967164+00:00",
+  "checked_at": "2026-10-17T08:09:54.071325+00:00",
   "method": "multi_name_official_announcement_contextual_detection",
   "known_species_count": 1875,
-  "articles_analyzed": 2116,
+  "articles_analyzed": 2117,
   "candidate_count": 0,
   "pending_review_count": 0,
   "manually_validated_count": 0,
