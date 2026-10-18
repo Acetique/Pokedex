@@ -1,6 +1,6 @@
 {
   "version": "5.8",
-  "checked_at": "2026-10-17T08:09:53.586641+00:00",
+  "checked_at": "2026-10-18T08:10:08.544376+00:00",
   "announcement_count": 35,
   "announcements": [
     {
@@ -8,7 +8,7 @@
       "url": "https://www.pokemon.com/us/news/see-the-new-trailer-for-pokemon-winds-and-pokemon-waves-coming-to-nintendo-switch-2",
       "published_at": null,
       "sitemap_lastmod": "2026-10-09T18:34:24.579Z",
-      "priority_score": 280,
+      "priority_score": 255,
       "announcement_category": "generation_10_news",
       "inspection_status": "metadata_only",
       "title_signal_only": true,
