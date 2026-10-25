@@ -1,6 +1,6 @@
 {
   "version": "5.8",
-  "checked_at": "2026-10-24T08:12:56.767890+00:00",
+  "checked_at": "2026-10-25T08:12:02.044800+00:00",
   "announcement_count": 35,
   "announcements": [
     {
@@ -20,7 +20,7 @@
       "url": "https://www.pokemon.com/us/news/pokemon-legends-z-a-nintendo-switch-2-edition-mega-dimension-bundle-coming-soon",
       "published_at": null,
       "sitemap_lastmod": "2026-09-23T22:55:27.371Z",
-      "priority_score": 175,
+      "priority_score": 155,
       "announcement_category": "new_form_or_mega",
       "inspection_status": "metadata_only",
       "title_signal_only": true,
