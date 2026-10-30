@@ -1,12 +1,12 @@
 {
   "version": "5.8",
-  "checked_at": "2026-10-29T08:36:04.678742+00:00",
+  "checked_at": "2026-10-30T08:37:00.424878+00:00",
   "catalogue_status": "ok",
   "news_status": "ok",
   "news_mode": "metadata_only",
   "news_articles_downloaded": 0,
   "new_species_verification": "pokeapi",
-  "priority_announcements": 35,
+  "priority_announcements": 37,
   "sitemaps_read": 3,
   "sitemap_response_types": {
     "xml_ok": 3,

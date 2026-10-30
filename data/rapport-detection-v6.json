@@ -1,6 +1,6 @@
 {
   "version": "6.2",
-  "checked_at": "2026-10-29T08:36:04.903237+00:00",
+  "checked_at": "2026-10-30T08:37:00.771190+00:00",
   "sources": {
     "nouveautes-pokemon.json": {
       "exists": true,
@@ -8,19 +8,19 @@
     },
     "annonces-prioritaires.json": {
       "exists": true,
-      "articles": 35
+      "articles": 37
     },
     "historique-actualites.json": {
       "exists": true,
-      "articles": 2130
+      "articles": 2136
     },
     "official-news-review.json": {
       "exists": true,
       "articles": 0
     }
   },
-  "articles_analyzed": 2130,
-  "excluded_product_event_articles": 1001,
+  "articles_analyzed": 2136,
+  "excluded_product_event_articles": 1003,
   "pattern_matches": 0,
   "existing_species_matches": 0,
   "rejected_matches": 0,

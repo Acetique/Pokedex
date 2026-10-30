@@ -1,7 +1,7 @@
 {
   "version": "5.8",
-  "checked_at": "2026-10-29T08:36:04.605215+00:00",
-  "announcement_count": 35,
+  "checked_at": "2026-10-30T08:37:00.306762+00:00",
+  "announcement_count": 37,
   "announcements": [
     {
       "title": "See The New Trailer For Pokemon Winds And Pokemon Waves Coming To Nintendo Switch 2",
@@ -10,6 +10,30 @@
       "sitemap_lastmod": "2026-10-09T18:34:24.579Z",
       "priority_score": 255,
       "announcement_category": "generation_10_news",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Get Ready For The Mega Evolution Battle Event In Pokemon Champions",
+      "url": "https://www.pokemon.com/us/news/get-ready-for-the-mega-evolution-battle-event-in-pokemon-champions",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-28T16:03:59.529Z",
+      "priority_score": 200,
+      "announcement_category": "new_form_or_mega",
+      "inspection_status": "metadata_only",
+      "title_signal_only": true,
+      "verified_new_species": false,
+      "name_candidates_for_review": []
+    },
+    {
+      "title": "Pokemon Legends Z A Nintendo Switch 2 Edition Mega Dimension Now Available",
+      "url": "https://www.pokemon.com/us/news/pokemon-legends-z-a-nintendo-switch-2-edition-mega-dimension-now-available",
+      "published_at": null,
+      "sitemap_lastmod": "2026-10-26T20:24:21.055Z",
+      "priority_score": 200,
+      "announcement_category": "new_form_or_mega",
       "inspection_status": "metadata_only",
       "title_signal_only": true,
       "verified_new_species": false,
