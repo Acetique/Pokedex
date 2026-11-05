@@ -1,6 +1,6 @@
 {
   "version": "6.2",
-  "checked_at": "2026-11-04T08:42:57.834958+00:00",
+  "checked_at": "2026-11-05T08:44:20.591940+00:00",
   "sources": {
     "nouveautes-pokemon.json": {
       "exists": true,
@@ -12,14 +12,14 @@
     },
     "historique-actualites.json": {
       "exists": true,
-      "articles": 2142
+      "articles": 2144
     },
     "official-news-review.json": {
       "exists": true,
       "articles": 0
     }
   },
-  "articles_analyzed": 2142,
+  "articles_analyzed": 2144,
   "excluded_product_event_articles": 1007,
   "pattern_matches": 0,
   "existing_species_matches": 0,
