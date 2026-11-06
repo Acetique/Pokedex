@@ -1,6 +1,6 @@
 {
   "version": "5.8",
-  "checked_at": "2026-11-05T08:44:20.100721+00:00",
+  "checked_at": "2026-11-06T08:42:01.977004+00:00",
   "announcement_count": 37,
   "announcements": [
     {
@@ -20,7 +20,7 @@
       "url": "https://www.pokemon.com/us/news/get-ready-for-the-mega-evolution-battle-event-in-pokemon-champions",
       "published_at": null,
       "sitemap_lastmod": "2026-10-28T16:03:59.529Z",
-      "priority_score": 200,
+      "priority_score": 175,
       "announcement_category": "new_form_or_mega",
       "inspection_status": "metadata_only",
       "title_signal_only": true,
