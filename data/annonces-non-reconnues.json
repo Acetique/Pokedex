@@ -1,7 +1,7 @@
 {
   "version": "6.2",
-  "checked_at": "2026-11-13T15:43:59.481297+00:00",
-  "count": 28,
+  "checked_at": "2026-11-14T14:34:45.465978+00:00",
+  "count": 29,
   "announcements": [
     {
       "title": "Discover Applin In Pokemon Gos Sweet Discoveries Event",
@@ -31,6 +31,11 @@
     {
       "title": "Discover The Perfect Pokemon Present With The Pokemon 2024 Holiday Gift Guide",
       "url": "https://www.pokemon.com/us/news/discover-the-perfect-pokemon-present-with-the-pokemon-2024-holiday-gift-guide",
+      "reason": "Annonce potentiellement pertinente sans nom extrait"
+    },
+    {
+      "title": "Discover The Perfect Present In The 2026 Pokemon Holiday Gift Guide",
+      "url": "https://www.pokemon.com/us/news/discover-the-perfect-present-in-the-2026-pokemon-holiday-gift-guide",
       "reason": "Annonce potentiellement pertinente sans nom extrait"
     },
     {
